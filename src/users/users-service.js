@@ -14,11 +14,11 @@ const UsersService = {
             })
     },
 
-    getById(knex, id) {
+    getById(knex, userId) {
         return knex
             .from('user')
             .select('*')
-            .where('id', id)
+            .where('userId', userId)
             .first()
     },
 
@@ -34,15 +34,15 @@ const UsersService = {
             .first()
     },
 
-    deleteUser(knex, id) {
+    deleteUser(knex, userId) {
         return knex('user')
-            .where({ id })
+            .where({ userId })
             .delete()
     },
 
-    updateUser(knex, id, newUserFields) {
+    updateUser(knex, userId, newUserFields) {
         return knex('user')
-            .where({ id })
+            .where({ userId })
             .update(newUserFields)
     },
 }
