@@ -15,6 +15,8 @@ Complete the following steps to get started:
     PORT=8000
     DATABASE_URL="postgresql://USERNAME@localhost/DATABASENAME"
     TEST_DATABASE_URL="postgresql://USERNAME@localhost/DATABASENAME_test"
+    JWT_SECRET="my-own-special-jwt-secret"
+    JWT_EXPIRY="5h"
 6. Create a database with DATABASENAME and your USERNAME
 7. Run `npm run migrate` to create tables
 8. Run `npm run dev` to start nodemon
@@ -32,13 +34,12 @@ Run the tests `npm test`
 
 ## Docs
 
-### User
+### Register
 
-GET all users: /api/users
-GET user by id: /api/users/:id
+api/users/register - (body must contain firstName, lastName, email, password)
 
-POST a new user: /api/users (body must include name, email, password) POST to Login: /api/users/login (body must include email & password)
+### Login
 
-DELETE user: /api/users/:id
+api/auth/login - (body must include email and password)
 
-PATCH user: /api/users/:id (Request body must contain either 'name', 'email', or 'password')
+
