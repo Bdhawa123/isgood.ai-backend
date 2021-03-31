@@ -43,3 +43,6 @@ api/users/register - (body must contain firstName, lastName, email, password)
 api/auth/login - (body must include email and password)
 
 
+### Organization
+
+api/org/create - (body must contain name and url)

@@ -7,6 +7,7 @@ const logger = require('./logger')
 const { NODE_ENV } = require('./config')
 const usersRouter = require('./routes/users-router')
 const authRouter = require('./routes/auth-router')
+const orgRouter = require('./routes/org-router')
 
 const app = express()
 
@@ -23,10 +24,8 @@ app.use(cors())
 
 app.use('/api/auth', authRouter)
 app.use('/api/users', usersRouter)
+app.use('/api/org', orgRouter)
 
-app.get('/', (req, res) => {
-    res.send('Hello, world!')
-})
 
 app.use(function errorHandler(error, req, res, next) {
     let response
