@@ -4,19 +4,6 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- CreateEnum
 CREATE TYPE "Role" AS ENUM ('ADMIN', 'ORGANIZATION_OWNER', 'PROJECT_OWNER', 'PROJECT_MANAGER', 'COLLABORATOR', 'GUEST_VIEW', 'USER');
 
--- CreateTable
-CREATE TABLE "user" (
-    "userId" uuid DEFAULT uuid_generate_v4(),
-    "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "firstName" VARCHAR(255) NOT NULL,
-    "lastName" VARCHAR(255) NOT NULL,
-    "email" VARCHAR(255) NOT NULL,
-    "password" VARCHAR(255) NOT NULL,
-    "status" BOOLEAN NOT NULL DEFAULT true,
-
-    PRIMARY KEY ("userId")
-);
-
 
 -- CreateTable
 CREATE TABLE "org" (
@@ -28,6 +15,21 @@ CREATE TABLE "org" (
     "planStatus" TEXT NOT NULL,
 
     PRIMARY KEY ("orgId")
+);
+
+-- CreateTable
+CREATE TABLE "user" (
+    "userId" uuid DEFAULT uuid_generate_v4(),
+    "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "firstName" VARCHAR(255) NOT NULL,
+    "lastName" VARCHAR(255) NOT NULL,
+    "email" VARCHAR(255) NOT NULL,
+    "password" VARCHAR(255) NOT NULL,
+    "status" BOOLEAN NOT NULL DEFAULT true,
+    "lastOrgId" INTEGER,
+
+    PRIMARY KEY ("userId"),
+    FOREIGN KEY ("lastOrgId") REFERENCES "org"("orgId") 
 );
 
 -- CreateTable
