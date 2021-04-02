@@ -46,3 +46,4 @@ api/auth/login - (body must include email and password)
 ### Organization
 
 api/org/create - (body must contain name and url)
+api/org - (retrieve all organizations based on userId)
