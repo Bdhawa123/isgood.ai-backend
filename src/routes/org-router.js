@@ -38,7 +38,8 @@ orgRouter
                     orgIds
                 )
                     .then(orgs => {
-                        res.json(orgs)
+                        res.status(200)
+                        .json(orgs)
                     })
                     .catch(next)
 
