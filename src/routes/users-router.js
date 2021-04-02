@@ -6,6 +6,7 @@ const usersRouter = express.Router()
 const jsonBodyParser = express.json()
 
 usersRouter
+//validate email before create user
   .post('/register', jsonBodyParser, (req, res, next) => {
     const { firstName, lastName, email, password } = req.body
 

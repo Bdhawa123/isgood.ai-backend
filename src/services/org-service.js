@@ -15,6 +15,17 @@ const OrgService = {
         .returning('*')
         .then(([orgUser]) => orgUser)
     },
+    getOrgIdBasedOnUser(knex, userId) {
+        return knex('orgUser')
+        .select('*')
+        .where('userId', userId)
+    },
+    getOrgs(db, orgId) {
+        return db
+        .select('*')
+        .from('org')
+        .whereIn('orgId', orgId)
+    },
 
     serializeOrg(org) {
         return {
