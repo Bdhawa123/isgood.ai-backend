@@ -38,6 +38,9 @@ CREATE TABLE "project" (
     "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "name" TEXT NOT NULL,
     "description" TEXT NOT NULL,
+    "geolocation" TEXT,
+    "startDate" TIMESTAMPTZ,
+    "endDate" TIMESTAMPTZ,
     "orgId" INTEGER,
 
     PRIMARY KEY ("projectId"),
@@ -64,7 +67,7 @@ CREATE TABLE "projectUser" (
     "projectUserId" SERIAL NOT NULL,
     "projectId" INTEGER NOT NULL,
     "userId" UUID NOT NULL,
-    "role" "Role" NOT NULL DEFAULT E'GUEST_VIEW',
+    "role" "Role" NOT NULL DEFAULT E'PROJECT_OWNER',
     "status" BOOLEAN NOT NULL DEFAULT true,
     "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 

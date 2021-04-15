@@ -21,6 +21,24 @@ const ProjectService = {
     createDemographics(knex, newDemographics) {
         return knex('demographic')
         .insert(newDemographics, ["*"])
+    },
+    createProjectUser(db, projectUserInfo) {
+        return db   
+        .insert(projectUserInfo)
+        .into('projectUser')
+        .returning('*')
+        .then(([projectUser]) => projectUser)
+    },
+    getProjectIdBasedOnUser(knex, userId) {
+        return knex('projectUser')
+        .select('*')
+        .where('userId', userId)
+    },
+    getProjects(db, projectId) {
+        return db
+        .select('*')
+        .from('project')
+        .whereIn('projectId', projectId)
     }
 }
 
