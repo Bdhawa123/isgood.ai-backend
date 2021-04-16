@@ -14,6 +14,10 @@ const ProjectService = {
         return knex('outcome')
         .insert(newOutcomes, ["*"])
     },
+    createIndicators(knex, indicators) {
+        return knex('indicator')
+        .insert(indicators, ["*"])
+    },
     createBeneficiaries(knex, newBeneficiaries) {
         return knex('beneficiary')
         .insert(newBeneficiaries, ["*"])

@@ -119,6 +119,15 @@ CREATE TABLE "outcome" (
     FOREIGN KEY ("projectId") REFERENCES "project"("projectId") ON DELETE CASCADE
 );
 
+CREATE TABLE "indicator" (
+    "projectId" INTEGER NOT NULL,
+    "indicatorId" TEXT NOT NULL,
+    "alignedStrength" TEXT NOT NULL,
+
+    PRIMARY KEY ("projectId" , "indicatorId"),
+    FOREIGN KEY ("projectId") REFERENCES "project"("projectId") ON DELETE CASCADE
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "user.email_unique" ON "user"("email");
 
