@@ -1,5 +1,4 @@
 const express = require('express')
-const path = require('path')
 const xss = require('xss')
 const OrgService = require('../services/org-service')
 const AuthService = require('../services/auth-service')
@@ -50,7 +49,7 @@ orgRouter
         const token = authHeader && authHeader.split(' ')[1]
 
         if (token == null) return res.status(401)
-        // console.log(token)
+       
 
         const userId = AuthService.verifyJwt(token).userId
         
@@ -107,3 +106,4 @@ orgRouter
     })
 
 module.exports = orgRouter
+

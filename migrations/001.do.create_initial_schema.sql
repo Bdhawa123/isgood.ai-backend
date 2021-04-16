@@ -38,9 +38,9 @@ CREATE TABLE "project" (
     "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "name" TEXT NOT NULL,
     "description" TEXT NOT NULL,
-    "projecimpacts" TEXT NOT NULL,
-    "projectoutcomes" TEXT NOT NULL,
-    "projectindicators" TEXT NOT NULL,
+    "geolocation" TEXT,
+    "startDate" TIMESTAMPTZ,
+    "endDate" TIMESTAMPTZ,
     "orgId" INTEGER,
 
     PRIMARY KEY ("projectId"),
@@ -67,7 +67,7 @@ CREATE TABLE "projectUser" (
     "projectUserId" SERIAL NOT NULL,
     "projectId" INTEGER NOT NULL,
     "userId" UUID NOT NULL,
-    "role" "Role" NOT NULL DEFAULT E'GUEST_VIEW',
+    "role" "Role" NOT NULL DEFAULT E'PROJECT_OWNER',
     "status" BOOLEAN NOT NULL DEFAULT true,
     "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -81,6 +81,7 @@ CREATE TABLE "beneficiary" (
     "beneficiaryId" SERIAL NOT NULL,
     "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "name" TEXT NOT NULL,
+    "lifeChange" TEXT NOT NULL,
     "projectId" INTEGER,
 
     PRIMARY KEY ("beneficiaryId"),
@@ -92,10 +93,39 @@ CREATE TABLE "demographic" (
     "demographicId" SERIAL NOT NULL,
     "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "name" TEXT NOT NULL,
+    "operator" TEXT NOT NULL,
+    "value" TEXT NOT NULL,
     "beneficiaryId" INTEGER,
 
     PRIMARY KEY ("demographicId"),
     FOREIGN KEY ("beneficiaryId") REFERENCES "beneficiary"("beneficiaryId") ON DELETE CASCADE
+);
+
+CREATE TABLE "impact" (
+    "impactId" SERIAL NOT NULL,
+    "description" TEXT NOT NULL,
+    "projectId" INTEGER,
+
+    PRIMARY KEY ("impactId"),
+    FOREIGN KEY ("projectId") REFERENCES "project"("projectId") ON DELETE CASCADE
+);
+
+CREATE TABLE "outcome" (
+    "outcomeId" SERIAL NOT NULL,
+    "description" TEXT NOT NULL,
+    "projectId" INTEGER NOT NULL,
+
+    PRIMARY KEY ("outcomeId"),
+    FOREIGN KEY ("projectId") REFERENCES "project"("projectId") ON DELETE CASCADE
+);
+
+CREATE TABLE "indicator" (
+    "projectId" INTEGER NOT NULL,
+    "indicatorId" TEXT NOT NULL,
+    "alignedStrength" TEXT NOT NULL,
+
+    PRIMARY KEY ("projectId" , "indicatorId"),
+    FOREIGN KEY ("projectId") REFERENCES "project"("projectId") ON DELETE CASCADE
 );
 
 -- CreateIndex

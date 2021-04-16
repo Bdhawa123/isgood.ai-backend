@@ -19,6 +19,7 @@ Complete the following steps to get started:
     JWT_EXPIRY="5h"
 6. Create a database with DATABASENAME and your USERNAME
 7. Run `npm run migrate` to create tables
+8. Run `npm run serveIndicator` to start jsonServer to populate indicators with dummydata
 8. Run `npm run dev` to start nodemon
 
 ## Scripts
@@ -34,6 +35,8 @@ Run the tests `npm test`
 
 ## Docs
 
+Protected Endpoints need an Authorization header containing the Bearer token
+
 ### Register
 
 api/users/register - (body must contain firstName, lastName, email, password)
@@ -45,5 +48,16 @@ api/auth/login - (body must include email and password)
 
 ### Organization
 
-api/org/create - (body must contain name and url)
-api/org - (retrieve all organizations based on userId)
+POST
+api/org/create - (body must contain name and url and a Authorization header containing the Bearer token)
+
+GET
+api/org - (retrieve all organizations based on userId and a Authorization header containing the Bearer token)
+
+### Projects
+
+POST
+api/project/create - (body must contain orgId, name, description, projectImpacts, and outcomesDesired)
+
+GET
+api/project - (returns * projects based on user... (not complete still needs to return projectImpacts, and outcomesDesired in response))
