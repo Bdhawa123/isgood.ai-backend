@@ -1,25 +1,27 @@
 const express = require('express')
 const xss = require('xss')
 const OrgService = require('../services/org-service')
-const AuthService = require('../services/auth-service')
 const UsersService = require('../services/users-service')
-const { requireAuth } = require('../middleware/jwt-auth')
+let jwtCheck = require('../middleware/oAuth')
+let Buffer = require('buffer/').Buffer
+// const jwtAuthz = require('express-jwt-authz');
 
 const orgRouter = express.Router()
 const jsonBodyParser = express.json()
+// const checkScopes = jwtAuthz([ 'Organization_Owner' ]);
 
 orgRouter
     //first check user for lastOrId if null then check orgUser table for orgs and return the orgs and user goes to global dash???
 
         //GET all organizations based on userId
-    .get('/', requireAuth, jsonBodyParser, (req, res, next) => {
+    .get('/', jwtCheck, jsonBodyParser, (req, res, next) => {
         const authHeader = req.headers['authorization']
         const token = authHeader && authHeader.split(' ')[1]
-
+    
         if (token == null) return res.status(401)
-        // console.log(token)
-
-        const userId = AuthService.verifyJwt(token).userId
+        
+        const decoded = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
+        const userId = decoded.sub
 
         OrgService.getOrgIdBasedOnUser(
             req.app.get('db'),
@@ -44,14 +46,14 @@ orgRouter
 
             })
     })
-    .post('/create', requireAuth, jsonBodyParser, (req, res, next) => {
+    .post('/create', jwtCheck, jsonBodyParser, (req, res, next) => {
         const authHeader = req.headers['authorization']
         const token = authHeader && authHeader.split(' ')[1]
-
+    
         if (token == null) return res.status(401)
-       
-
-        const userId = AuthService.verifyJwt(token).userId
+        
+        const decoded = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
+        const userId = decoded.sub
         
         const {name, url} = req.body
 
@@ -86,19 +88,8 @@ orgRouter
                 )
                         //Update User so we know the last org they were logged into
                     .then(orgUser => {
-                        //Update user 
-                        UsersService.updateLatestOrg(
-                            req.app.get('db'),
-                            orgUser.userId,
-                            {
-                                lastOrgId: orgUser.orgId
-                            }
-                        )
-                                //All is well! Send back the organization
-                            .then(user => {
-                                res.status(201)
-                                .json(org)
-                            })
+                        res.status(201)
+                        .json(org)
                     })  
                     // Should we write some custom error handlers? https://expressjs.com/en/guide/error-handling.html
                     .catch(next)

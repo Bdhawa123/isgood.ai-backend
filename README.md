@@ -17,6 +17,8 @@ Complete the following steps to get started:
     TEST_DATABASE_URL="postgresql://USERNAME@localhost/DATABASENAME_test"
     JWT_SECRET="my-own-special-jwt-secret"
     JWT_EXPIRY="5h"
+    CLIENT_ID=""
+    CLIENT_SECRET=""
 6. Create a database with DATABASENAME and your USERNAME
 7. Run `npm run migrate` to create tables
 8. Run `npm run serveIndicator` to start jsonServer to populate indicators with dummydata

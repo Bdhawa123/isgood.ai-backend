@@ -2,9 +2,8 @@ const express = require('express')
 const xss = require('xss')
 const axios = require('axios')
 const ProjectService = require('../services/project-service')
-const AuthService = require('../services/auth-service')
-const { requireAuth } = require('../middleware/jwt-auth')
-
+let Buffer = require('buffer/').Buffer
+let jwtCheck = require('../middleware/oAuth')
 const projectRouter = express.Router()
 const jsonBodyParser = express.json()
 
@@ -13,12 +12,15 @@ const jsonBodyParser = express.json()
 
 projectRouter
     
-    .get('/', requireAuth, jsonBodyParser, (req, res, next) => {
+    .get('/', jwtCheck, jsonBodyParser, (req, res, next) => {
         //Get userId
         const authHeader = req.headers['authorization']
         const token = authHeader && authHeader.split(' ')[1]
+    
         if (token == null) return res.status(401)
-        const userId = AuthService.verifyJwt(token).userId
+        
+        const decoded = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
+        const userId = decoded.sub
 
         ProjectService.getProjectIdBasedOnUser(
             req.app.get('db'),
@@ -44,14 +46,15 @@ projectRouter
  
     })
 
-    .post('/create', requireAuth, jsonBodyParser, (req, res, next) => {
+    .post('/create', jwtCheck, jsonBodyParser, (req, res, next) => {
             //Get userId
         const authHeader = req.headers['authorization']
         const token = authHeader && authHeader.split(' ')[1]
-        
+    
         if (token == null) return res.status(401)
         
-        const userId = AuthService.verifyJwt(token).userId
+        const decoded = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
+        const userId = decoded.sub
         
             //deconstruct req.body
         const {name, description, projectImpacts, outcomesDesired, orgId } = req.body
@@ -232,3 +235,49 @@ projectRouter
 
 
 module.exports = projectRouter
+
+
+
+// {
+//     projectId: 1234567890
+//     name: "test",
+//     description: "string",
+//     projectImpacts: ["string", "string", "string"],
+//     outcomesDesired: ["string", "string", "string"],
+//     beneficiaries: [
+//         {
+//            name: "string",
+//            change: "string",
+//            demographics: [
+//                {
+//                    type: "string",
+//                    operator: "string",
+//                    value: integer
+//                },
+//            ] 
+//         },
+//     ],
+//     geolocation: [lat, lng],
+//     startDate: "timestamp",
+//     endDate: "timestamp"
+
+// }
+
+
+// {
+//     projectId: 1234567890,
+//     indicators: [
+//         {
+//             indicatorID: primaryKeyOfIndicatorxxx,
+//             alignedStrength: 0.937465873983,  //I am the vector of strength?
+//         },
+//         {
+//             indicatorID: primaryKeyOfIndicatorxxx,
+//             alignedStrength: 0.837465873983,  //I am the vector of strength?
+//         },
+//         {
+//             indicatorID: primaryKeyOfIndicatorxxx,
+//             alignedStrength: 0.737465873983,  //I am the vector of strength?
+//         }
+//     ]
+// }

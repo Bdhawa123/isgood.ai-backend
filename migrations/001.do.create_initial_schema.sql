@@ -18,19 +18,19 @@ CREATE TABLE "org" (
 );
 
 -- CreateTable
-CREATE TABLE "user" (
-    "userId" uuid DEFAULT uuid_generate_v4(),
-    "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "firstName" VARCHAR(255) NOT NULL,
-    "lastName" VARCHAR(255) NOT NULL,
-    "email" VARCHAR(255) NOT NULL,
-    "password" VARCHAR(255) NOT NULL,
-    "status" BOOLEAN NOT NULL DEFAULT true,
-    "lastOrgId" INTEGER,
+-- CREATE TABLE "user" (
+--     "userId" uuid DEFAULT uuid_generate_v4(),
+--     "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+--     "firstName" VARCHAR(255) NOT NULL,
+--     "lastName" VARCHAR(255) NOT NULL,
+--     "email" VARCHAR(255) NOT NULL,
+--     "password" VARCHAR(255) NOT NULL,
+--     "status" BOOLEAN NOT NULL DEFAULT true,
+--     "lastOrgId" INTEGER,
 
-    PRIMARY KEY ("userId"),
-    FOREIGN KEY ("lastOrgId") REFERENCES "org"("orgId") 
-);
+--     PRIMARY KEY ("userId"),
+--     FOREIGN KEY ("lastOrgId") REFERENCES "org"("orgId") 
+-- );
 
 -- CreateTable
 CREATE TABLE "project" (
@@ -51,14 +51,13 @@ CREATE TABLE "project" (
 CREATE TABLE "orgUser" (
     "orgUserId" SERIAL NOT NULL,
     "orgId" INTEGER NOT NULL,
-    "userId" UUID,
+    "userId" TEXT NOT NULL,
     "role" "Role" NOT NULL DEFAULT E'ORGANIZATION_OWNER',
     "invitationToken" TEXT,
     "status" BOOLEAN NOT NULL DEFAULT true,
     "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     PRIMARY KEY ("orgUserId"),
-    FOREIGN KEY ("userId") REFERENCES "user"("userId") ON DELETE CASCADE,
     FOREIGN KEY ("orgId") REFERENCES "org"("orgId") ON DELETE CASCADE
 );
 
@@ -66,13 +65,12 @@ CREATE TABLE "orgUser" (
 CREATE TABLE "projectUser" (
     "projectUserId" SERIAL NOT NULL,
     "projectId" INTEGER NOT NULL,
-    "userId" UUID NOT NULL,
+    "userId" TEXT NOT NULL,
     "role" "Role" NOT NULL DEFAULT E'PROJECT_OWNER',
     "status" BOOLEAN NOT NULL DEFAULT true,
     "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     PRIMARY KEY ("projectUserId"),
-    FOREIGN KEY ("userId") REFERENCES "user"("userId") ON DELETE CASCADE,
     FOREIGN KEY ("projectId") REFERENCES "project"("projectId") ON DELETE CASCADE
 );
 
@@ -129,7 +127,7 @@ CREATE TABLE "indicator" (
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "user.email_unique" ON "user"("email");
+-- CREATE UNIQUE INDEX "user.email_unique" ON "user"("email");
 
 -- ALTER TABLE "user"
 -- ADD COLUMN "updated_at" 
