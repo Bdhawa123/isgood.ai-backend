@@ -57,7 +57,7 @@ projectRouter
         const userId = decoded.sub
         
             //deconstruct req.body
-        const {name, description, projectImpacts, outcomesDesired, orgId } = req.body
+        const {name, description, projectImpacts, outcomesDesired, beneficiaries, orgId } = req.body
         
 
             //construct newProject
@@ -71,8 +71,8 @@ projectRouter
         let theObj = {
             name: xss(name), 
             description: xss(description),
-            projectImpacts: xss(projectImpacts),
-            outcomesDesired: xss(outcomesDesired)
+            projectImpacts: projectImpacts,
+            outcomesDesired: outcomesDesired
         }
             //Stringify projectObject to pass to DS side
         let theString = ""
@@ -132,17 +132,79 @@ projectRouter
                                     }
                                 )
                                     .then(projectUser => {
+                                        if(beneficiaries.length > 0) {
+                                            setBeneficiaries(project.projectId, beneficiaries)
+                                        }
                                             //send project to DS to get the indicators to the project
-                                        getIndicators(project.projectId, theString)
+                                        getIndicators(project.projectId, theObj)
                                     })
                             })
                     })
             })
             .catch(next)
 
-            function getIndicators(projectId, theString) {
+            function setBeneficiaries(projectId, beneficiaries) {
+                const newBeneficiaries = []
+                beneficiaries.map(beneficiary => {
+                    newBeneficiaries.push({
+                        "projectId": projectId, 
+                        "name": xss(beneficiary.name), 
+                        "lifeChange": xss(beneficiary.lifeChange)
+                    })
+                })
+                ProjectService.createBeneficiaries(
+                    req.app.get('db'),
+                    newBeneficiaries
+                )
+                        //insert demographics into demographic table
+                    .then(beneficiaryRes => {
+                        let newDemographics = []
+                        for(let i = 0; i < beneficiaries.length; i++) {
+                            if (beneficiaries[i].demographics) {
+                                for(let j = 0; j < beneficiaries[i].demographics.length; j++) {
+                                        if (!beneficiaries[i].demographics[j].name || !beneficiaries[i].demographics[j].operator || !beneficiaries[i].demographics[j].value) {
+                                            return res.status(400).json({
+                                                error: `Name, operator, and value required in demographics request body`
+                                            })
+                                        } else {
+                                            newDemographics.push({
+                                                "beneficiaryId": beneficiaryRes[i].beneficiaryId,
+                                                "name": xss(beneficiaries[i].demographics[j].name),
+                                                "operator": xss(beneficiaries[i].demographics[j].operator),
+                                                "value": xss(beneficiaries[i].demographics[j].value)
+                                            })
+                                        }
+                                    
+                                }
+                            }
+                        }
+                        ProjectService.createDemographics(
+                            req.app.get('db'),
+                            newDemographics
+                        )
+                            .then(demographics => {
+                                    // All is well return the project. To get beneficiaries and demographics client will have to make a GET request
+                                res.status(201)
+                                .json({
+                                    projectId: project.projectId, 
+                                    role: projectUser.role,
+                                    name: xss(name), 
+                                    description: xss(description),
+                                    orgId: orgId,
+                                    projectImpacts: xss(projectImpacts),
+                                    outcomesDesired: xss(outcomesDesired),
+                                    geolocation: xss(geolocation),
+                                    startDate: startDate,
+                                    endDate: endDate
+                                })
+                            })
+                    })
+            .catch(next)    
+            }
+
+            function getIndicators(projectId, theObj) {
                     //Will be a post request but the endpoint is not functioning yet. Using jsonServer for now to create dummy data
-                axios.get('http://localhost:9090/projectIndicators') 
+                axios.post('https://feirpqbvp3.execute-api.us-east-2.amazonaws.com/test/echo', theObj) 
                     .then(indicators => {
                         let concatIndicators = []
                         indicators.data.map(indicator => {
