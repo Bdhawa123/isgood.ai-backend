@@ -67,17 +67,12 @@ projectRouter
             orgId: orgId
         }
 
-            //reconstruct projectObject to create string
+            //reconstruct projectObject to send to Gateway api
         let theObj = {
             name: xss(name), 
             description: xss(description),
             projectImpacts: projectImpacts,
             outcomesDesired: outcomesDesired
-        }
-            //Stringify projectObject to pass to DS side
-        let theString = ""
-        for (let i in theObj) {
-            theString += i + ":" + theObj[i] + ", "
         }
     
         
@@ -132,16 +127,17 @@ projectRouter
                                     }
                                 )
                                     .then(projectUser => {
-                                        if(beneficiaries.length > 0) {
+                                        if(beneficiaries) {
                                             setBeneficiaries(project.projectId, beneficiaries)
                                         }
+                                          // Need to change projectId to assetId? 
+                                        theObj.projectId = project.assetId
                                             //send project to DS to get the indicators to the project
-                                        getIndicators(project.projectId, theObj)
+                                        getIndicators(theObj)
                                     })
                             })
                     })
-            })
-            .catch(next)
+            }).catch(next)
 
             function setBeneficiaries(projectId, beneficiaries) {
                 const newBeneficiaries = []
@@ -174,7 +170,6 @@ projectRouter
                                                 "value": xss(beneficiaries[i].demographics[j].value)
                                             })
                                         }
-                                    
                                 }
                             }
                         }
@@ -183,33 +178,19 @@ projectRouter
                             newDemographics
                         )
                             .then(demographics => {
-                                    // All is well return the project. To get beneficiaries and demographics client will have to make a GET request
-                                res.status(201)
-                                .json({
-                                    projectId: project.projectId, 
-                                    role: projectUser.role,
-                                    name: xss(name), 
-                                    description: xss(description),
-                                    orgId: orgId,
-                                    projectImpacts: xss(projectImpacts),
-                                    outcomesDesired: xss(outcomesDesired),
-                                    geolocation: xss(geolocation),
-                                    startDate: startDate,
-                                    endDate: endDate
-                                })
+                                next
                             })
-                    })
-            .catch(next)    
+                    }).catch(next)    
             }
 
-            function getIndicators(projectId, theObj) {
+            function getIndicators(theObj) {
                     //Will be a post request but the endpoint is not functioning yet. Using jsonServer for now to create dummy data
                 axios.post('https://feirpqbvp3.execute-api.us-east-2.amazonaws.com/test/echo', theObj) 
                     .then(indicators => {
                         let concatIndicators = []
-                        indicators.data.map(indicator => {
+                        indicators.data.indicators.map(indicator => {
                             concatIndicators.push({
-                                "projectId": projectId, 
+                                "assetId": indicators.data.projectId, 
                                 "indicatorId": indicator.indicatorId,
                                 "alignedStrength": indicator.alignedStrength
                             })
@@ -226,120 +207,4 @@ projectRouter
             }
     })
 
-    
-
-                ///////////////////might use this is code in a PATCH request to add beneficiaries, demographics, geolocation, startDate, and endDate ///////////////////
-
-    // .then(projectUser => {
-    //         const newBeneficiaries = []
-    //         beneficiaries.map(beneficiary => {
-    //             newBeneficiaries.push({
-    //                 "projectId": project.projectId, 
-    //                 "name": xss(beneficiary.name), 
-    //                 "lifeChange": xss(beneficiary.lifeChange)
-    //             })
-    //         })
-    //         ProjectService.createBeneficiaries(
-    //             req.app.get('db'),
-    //             newBeneficiaries
-    //         )
-    //                 //insert demographics into demographic table
-    //             .then(beneficiaryRes => {
-    //                 let newDemographics = []
-    //                 for(let i = 0; i < beneficiaries.length; i++) {
-    //                     if (beneficiaries[i].demographics) {
-    //                         for(let j = 0; j < beneficiaries[i].demographics.length; j++) {
-    //                                 if (!beneficiaries[i].demographics[j].name || !beneficiaries[i].demographics[j].operator || !beneficiaries[i].demographics[j].value) {
-    //                                     return res.status(400).json({
-    //                                         error: `Name, operator, and value required in demographics request body`
-    //                                     })
-    //                                 } else {
-    //                                     newDemographics.push({
-    //                                         "beneficiaryId": beneficiaryRes[i].beneficiaryId,
-    //                                         "name": xss(beneficiaries[i].demographics[j].name),
-    //                                         "operator": xss(beneficiaries[i].demographics[j].operator),
-    //                                         "value": xss(beneficiaries[i].demographics[j].value)
-    //                                     })
-    //                                 }
-                                
-    //                         }
-    //                     }
-    //                 }
-    //                 ProjectService.createDemographics(
-    //                     req.app.get('db'),
-    //                     newDemographics
-    //                 )
-    //                     .then(demographics => {
-    //                             // All is well return the project. To get beneficiaries and demographics client will have to make a GET request
-    //                         res.status(201)
-    //                         .json({
-    //                             projectId: project.projectId, 
-    //                             role: projectUser.role,
-    //                             name: xss(name), 
-    //                             description: xss(description),
-    //                             orgId: orgId,
-    //                             projectImpacts: xss(projectImpacts),
-    //                             outcomesDesired: xss(outcomesDesired),
-    //                             geolocation: xss(geolocation),
-    //                             startDate: startDate,
-    //                             endDate: endDate
-    //                         })
-    //                     })
-    //             })
-        
-    // }).catch(next)
-
-
-    
-
- 
-
-
-
 module.exports = projectRouter
-
-
-
-// {
-//     projectId: 1234567890
-//     name: "test",
-//     description: "string",
-//     projectImpacts: ["string", "string", "string"],
-//     outcomesDesired: ["string", "string", "string"],
-//     beneficiaries: [
-//         {
-//            name: "string",
-//            change: "string",
-//            demographics: [
-//                {
-//                    type: "string",
-//                    operator: "string",
-//                    value: integer
-//                },
-//            ] 
-//         },
-//     ],
-//     geolocation: [lat, lng],
-//     startDate: "timestamp",
-//     endDate: "timestamp"
-
-// }
-
-
-// {
-//     projectId: 1234567890,
-//     indicators: [
-//         {
-//             indicatorID: primaryKeyOfIndicatorxxx,
-//             alignedStrength: 0.937465873983,  //I am the vector of strength?
-//         },
-//         {
-//             indicatorID: primaryKeyOfIndicatorxxx,
-//             alignedStrength: 0.837465873983,  //I am the vector of strength?
-//         },
-//         {
-//             indicatorID: primaryKeyOfIndicatorxxx,
-//             alignedStrength: 0.737465873983,  //I am the vector of strength?
-//         }
-//     ]
-// }

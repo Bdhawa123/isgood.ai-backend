@@ -139,12 +139,12 @@ CREATE TABLE "outcome" (
 );
 
 CREATE TABLE "indicator" (
-    "projectId" INTEGER NOT NULL,
+    "assetId" TEXT NOT NULL,
     "indicatorId" TEXT NOT NULL,
     "alignedStrength" TEXT NOT NULL,
 
-    PRIMARY KEY ("projectId" , "indicatorId"),
-    FOREIGN KEY ("projectId") REFERENCES "project"("projectId") ON DELETE CASCADE
+    PRIMARY KEY ("assetId" , "indicatorId"),
+    FOREIGN KEY ("assetId") REFERENCES "project"("assetId") ON DELETE CASCADE
 );
 
 -- CreateIndex
