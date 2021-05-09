@@ -1,5 +1,24 @@
 -- Create Extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
+
+--UUID Function
+CREATE OR REPLACE FUNCTION generate_uid(size INT) RETURNS TEXT AS $$
+DECLARE
+  characters TEXT := 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  bytes BYTEA := gen_random_bytes(size);
+  l INT := length(characters);
+  i INT := 0;
+  output TEXT := '';
+BEGIN
+  WHILE i < size LOOP
+    output := output || substr(characters, get_byte(bytes, i) % l + 1, 1);
+    i := i + 1;
+  END LOOP;
+  RETURN output;
+END;
+$$ LANGUAGE plpgsql VOLATILE;
 
 -- CreateEnum
 CREATE TYPE "Role" AS ENUM ('ADMIN', 'ORGANIZATION_OWNER', 'PROJECT_OWNER', 'PROJECT_MANAGER', 'COLLABORATOR', 'GUEST_VIEW', 'USER');
@@ -8,6 +27,7 @@ CREATE TYPE "Role" AS ENUM ('ADMIN', 'ORGANIZATION_OWNER', 'PROJECT_OWNER', 'PRO
 -- CreateTable
 CREATE TABLE "org" (
     "orgId" SERIAL NOT NULL,
+    "assetId" TEXT NOT NULL DEFAULT concat('or-', generate_uid(6)) UNIQUE,
     "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "name" TEXT NOT NULL,
     "url" TEXT NOT NULL,
@@ -35,6 +55,7 @@ CREATE TABLE "org" (
 -- CreateTable
 CREATE TABLE "project" (
     "projectId" SERIAL NOT NULL,
+    "assetId" TEXT NOT NULL DEFAULT concat('pr-', generate_uid(6)) UNIQUE,
     "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "name" TEXT NOT NULL,
     "description" TEXT NOT NULL,
