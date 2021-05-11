@@ -98,6 +98,7 @@ CREATE TABLE "projectUser" (
 -- CreateTable
 CREATE TABLE "beneficiary" (
     "beneficiaryId" SERIAL NOT NULL,
+    "assetId" TEXT NOT NULL DEFAULT concat('bn-', generate_uid(6)) UNIQUE,
     "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "name" TEXT NOT NULL,
     "lifeChange" TEXT NOT NULL,
@@ -110,6 +111,7 @@ CREATE TABLE "beneficiary" (
 -- CreateTable
 CREATE TABLE "demographic" (
     "demographicId" SERIAL NOT NULL,
+    "assetId" TEXT NOT NULL DEFAULT concat('dg-', generate_uid(6)) UNIQUE,
     "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "name" TEXT NOT NULL,
     "operator" TEXT NOT NULL,
