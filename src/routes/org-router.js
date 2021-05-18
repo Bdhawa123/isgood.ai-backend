@@ -33,7 +33,7 @@ orgRouter
                         message: `No Organizations` 
                     })
                 }
-                const orgIds = orgUser.map(item => item.orgId)
+                const orgIds = orgUser.map(item => item.id)
                 OrgService.getOrgs(
                     req.app.get('db'),
                     orgIds
@@ -70,7 +70,7 @@ orgRouter
                 })
             //Whats a good way to set these as default? 
         newOrg.plan = "free"
-        newOrg.planStatus = "active"
+        newOrg.plan_status = "active"
 
                 //Create Organization
         OrgService.createOrg(
@@ -82,8 +82,8 @@ orgRouter
                 OrgService.createOrgUser(
                     req.app.get('db'),
                     {
-                        userId: userId,
-                        orgId: org.orgId
+                        user_id: userId,
+                        org_id: org.id
                     }
                 )
                         //Update User so we know the last org they were logged into

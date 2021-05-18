@@ -45,7 +45,38 @@ projectRouter
             .catch(next)
  
     })
+projectRouter
+    .get('/:projectId', jwtCheck, jsonBodyParser, (req, res, next) => {
+        //Get userId
+        const authHeader = req.headers['authorization']
+        const token = authHeader && authHeader.split(' ')[1]
+    
+        if (token == null) return res.status(401)
+        
+        const decoded = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
+        const userId = decoded.sub
+        console.log(req.params.projectId)
 
+        ProjectService.checkProjectForUser(
+            req.app.get('db'),
+            userId,
+            req.params.projectId
+        )
+            .then(metaUserProjectInfo => {
+                if(metaUserProjectInfo.length === 0) {
+                    return res.status(400).json({
+                        error: `No Projects` 
+                    })
+                } else {
+                    res.json(metaUserProjectInfo)
+                }
+                
+            }).catch(next)
+
+
+    })
+
+projectRouter
     .post('/create', jwtCheck, jsonBodyParser, (req, res, next) => {
             //Get userId
         const authHeader = req.headers['authorization']
@@ -64,15 +95,15 @@ projectRouter
         const newProject = {
             name: xss(name), 
             description: xss(description),
-            orgId: orgId
+            org_id: orgId
         }
 
             //reconstruct projectObject to send to Gateway api
         let theObj = {
             name: xss(name), 
             description: xss(description),
-            projectImpacts: projectImpacts,
-            outcomesDesired: outcomesDesired
+            project_impacts: projectImpacts,
+            outcomes_desired: outcomesDesired
         }
     
         
@@ -94,7 +125,7 @@ projectRouter
                 let newImpacts = []
                 projectImpacts.map(impact => {
                     newImpacts.push({
-                        "projectId": project.projectId, 
+                        "project_id": project.id, 
                         "description": xss(impact)
                     })
                 })
@@ -108,7 +139,7 @@ projectRouter
                         let newOutcomes = []
                         outcomesDesired.map(outcome => {
                             newOutcomes.push({
-                                "projectId": project.projectId, 
+                                "project_id": project.id, 
                                 "description": xss(outcome)
                             })
                         })
@@ -121,17 +152,17 @@ projectRouter
                                 ProjectService.createProjectUser(
                                     req.app.get('db'),
                                     {
-                                        projectId: project.projectId,
+                                        project_id: project.projectId,
                                         userId: userId
 
                                     }
                                 )
                                     .then(projectUser => {
-                                        if(beneficiaries) {
-                                            setBeneficiaries(project.projectId, beneficiaries)
+                                        if(beneficiaries.length > 0) {
+                                            setBeneficiaries(project.id, beneficiaries)
                                         }
                                           // Need to change projectId to assetId? 
-                                        theObj.projectId = project.assetId
+                                        theObj.projectId = project.project_id
                                             //send project to DS to get the indicators to the project
                                         getIndicators(theObj)
                                     })
@@ -143,7 +174,7 @@ projectRouter
                 const newBeneficiaries = []
                 beneficiaries.map(beneficiary => {
                     newBeneficiaries.push({
-                        "projectId": projectId, 
+                        "project_id": projectId, 
                         "name": xss(beneficiary.name), 
                         "lifeChange": xss(beneficiary.lifeChange)
                     })
@@ -164,7 +195,7 @@ projectRouter
                                             })
                                         } else {
                                             newDemographics.push({
-                                                "beneficiaryId": beneficiaryRes[i].beneficiaryId,
+                                                "beneficiary_id": beneficiaryRes[i].id,
                                                 "name": xss(beneficiaries[i].demographics[j].name),
                                                 "operator": xss(beneficiaries[i].demographics[j].operator),
                                                 "value": xss(beneficiaries[i].demographics[j].value)
@@ -190,9 +221,9 @@ projectRouter
                         let concatIndicators = []
                         indicators.data.indicators.map(indicator => {
                             concatIndicators.push({
-                                "assetId": indicators.data.projectId, 
-                                "indicatorId": indicator.indicatorId,
-                                "alignedStrength": indicator.alignedStrength
+                                "project_id": indicators.data.projectId, 
+                                "indicator_id": indicator.indicatorId,
+                                "aligned_strength": indicator.alignedStrength
                             })
                         })
                         ProjectService.createIndicators(
