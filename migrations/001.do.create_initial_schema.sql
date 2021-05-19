@@ -21,20 +21,38 @@ END;
 $$ LANGUAGE plpgsql VOLATILE;
 
 -- CreateEnum
-CREATE TYPE "Role" AS ENUM ('ADMIN', 'ORGANIZATION_OWNER', 'PROJECT_OWNER', 'PROJECT_MANAGER', 'COLLABORATOR', 'GUEST_VIEW', 'USER');
+-- CREATE TYPE "Role" AS ENUM ('ADMIN', 'ORGANIZATION_OWNER', 'PROJECT_OWNER', 'PROJECT_MANAGER', 'COLLABORATOR', 'GUEST_VIEW', 'USER');
+
+-- CreateTable 
+CREATE TABLE "roles" (
+    "id" SERIAL NOT NULL,
+    "name" VARCHAR(255) NOT NULL,
+
+    PRIMARY KEY ("id")
+);
+
+INSERT INTO "roles" (name)
+VALUES
+('ADMIN'),
+('ORGANIZATION_OWNER'),
+('PROJECT_OWNER'),
+('PROJECT_MANAGER'),
+('COLLABORATOR'),
+('GUEST_VIEW'),
+('USER');
 
 
 -- CreateTable
 CREATE TABLE "org" (
-    "orgId" SERIAL NOT NULL,
-    "assetId" TEXT NOT NULL DEFAULT concat('or-', generate_uid(6)) UNIQUE,
-    "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "id" SERIAL NOT NULL,
+    "org_id" TEXT NOT NULL DEFAULT concat('or-', generate_uid(6)) UNIQUE,
+    "created_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "name" TEXT NOT NULL,
     "url" TEXT NOT NULL,
     "plan" TEXT NOT NULL,
-    "planStatus" TEXT NOT NULL,
+    "plan_status" TEXT NOT NULL,
 
-    PRIMARY KEY ("orgId")
+    PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -54,99 +72,101 @@ CREATE TABLE "org" (
 
 -- CreateTable
 CREATE TABLE "project" (
-    "projectId" SERIAL NOT NULL,
-    "assetId" TEXT NOT NULL DEFAULT concat('pr-', generate_uid(6)) UNIQUE,
-    "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "id" SERIAL NOT NULL,
+    "project_id" TEXT NOT NULL DEFAULT concat('pr-', generate_uid(6)) UNIQUE,
+    "created_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "name" TEXT NOT NULL,
     "description" TEXT NOT NULL,
     "geolocation" TEXT,
-    "startDate" TIMESTAMPTZ,
-    "endDate" TIMESTAMPTZ,
-    "orgId" INTEGER,
+    "start_date" TIMESTAMPTZ,
+    "end_date" TIMESTAMPTZ,
+    "org_id" INTEGER,
 
-    PRIMARY KEY ("projectId"),
-    FOREIGN KEY ("orgId") REFERENCES "org"("orgId") ON DELETE CASCADE
+    PRIMARY KEY ("id"),
+    FOREIGN KEY ("org_id") REFERENCES "org"("id") ON DELETE CASCADE
 );
 
 -- CreateTable
-CREATE TABLE "orgUser" (
-    "orgUserId" SERIAL NOT NULL,
-    "orgId" INTEGER NOT NULL,
-    "userId" TEXT NOT NULL,
-    "role" "Role" NOT NULL DEFAULT E'ORGANIZATION_OWNER',
-    "invitationToken" TEXT,
+CREATE TABLE "org_user" (
+    "id" SERIAL NOT NULL,
+    "org_id" INTEGER NOT NULL,
+    "user_id" TEXT NOT NULL,
+    "role_id" INTEGER NOT NULL,
+    "invitation_token" TEXT,
     "status" BOOLEAN NOT NULL DEFAULT true,
-    "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "created_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    PRIMARY KEY ("orgUserId"),
-    FOREIGN KEY ("orgId") REFERENCES "org"("orgId") ON DELETE CASCADE
+    PRIMARY KEY ("id"),
+    FOREIGN KEY ("org_id") REFERENCES "org"("id") ON DELETE CASCADE,
+    FOREIGN KEY ("role_id") REFERENCES "roles"("id")
 );
 
 -- CreateTable
-CREATE TABLE "projectUser" (
-    "projectUserId" SERIAL NOT NULL,
-    "projectId" INTEGER NOT NULL,
-    "userId" TEXT NOT NULL,
-    "role" "Role" NOT NULL DEFAULT E'PROJECT_OWNER',
+CREATE TABLE "project_user" (
+    "id" SERIAL NOT NULL,
+    "project_id" TEXT NOT NULL,
+    "user_id" TEXT NOT NULL,
+    "role_id" INTEGER NOT NULL,
     "status" BOOLEAN NOT NULL DEFAULT true,
-    "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "created_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    PRIMARY KEY ("projectUserId"),
-    FOREIGN KEY ("projectId") REFERENCES "project"("projectId") ON DELETE CASCADE
+    PRIMARY KEY ("id"),
+    FOREIGN KEY ("project_id") REFERENCES "project"("project_id") ON DELETE CASCADE,
+    FOREIGN KEY ("role_id") REFERENCES "roles"("id")
 );
 
 -- CreateTable
 CREATE TABLE "beneficiary" (
-    "beneficiaryId" SERIAL NOT NULL,
-    "assetId" TEXT NOT NULL DEFAULT concat('bn-', generate_uid(6)) UNIQUE,
-    "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "id" SERIAL NOT NULL,
+    "beneficiary_id" TEXT NOT NULL DEFAULT concat('bn-', generate_uid(6)) UNIQUE,
+    "created_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "name" TEXT NOT NULL,
-    "lifeChange" TEXT NOT NULL,
-    "projectId" INTEGER,
+    "life_change" TEXT NOT NULL,
+    "project_id" INTEGER,
 
-    PRIMARY KEY ("beneficiaryId"),
-    FOREIGN KEY ("projectId") REFERENCES "project"("projectId") ON DELETE CASCADE
+    PRIMARY KEY ("id"),
+    FOREIGN KEY ("project_id") REFERENCES "project"("id") ON DELETE CASCADE
 );
 
 -- CreateTable
 CREATE TABLE "demographic" (
-    "demographicId" SERIAL NOT NULL,
-    "assetId" TEXT NOT NULL DEFAULT concat('dg-', generate_uid(6)) UNIQUE,
-    "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "id" SERIAL NOT NULL,
+    "demographic_id" TEXT NOT NULL DEFAULT concat('dg-', generate_uid(6)) UNIQUE,
+    "created_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "name" TEXT NOT NULL,
     "operator" TEXT NOT NULL,
     "value" TEXT NOT NULL,
-    "beneficiaryId" INTEGER,
+    "beneficiary_id" INTEGER,
 
-    PRIMARY KEY ("demographicId"),
-    FOREIGN KEY ("beneficiaryId") REFERENCES "beneficiary"("beneficiaryId") ON DELETE CASCADE
+    PRIMARY KEY ("id"),
+    FOREIGN KEY ("beneficiary_id") REFERENCES "beneficiary"("id") ON DELETE CASCADE
 );
 
 CREATE TABLE "impact" (
-    "impactId" SERIAL NOT NULL,
+    "id" SERIAL NOT NULL,
     "description" TEXT NOT NULL,
-    "projectId" INTEGER,
+    "project_id" INTEGER,
 
-    PRIMARY KEY ("impactId"),
-    FOREIGN KEY ("projectId") REFERENCES "project"("projectId") ON DELETE CASCADE
+    PRIMARY KEY ("id"),
+    FOREIGN KEY ("project_id") REFERENCES "project"("id") ON DELETE CASCADE
 );
 
 CREATE TABLE "outcome" (
-    "outcomeId" SERIAL NOT NULL,
+    "id" SERIAL NOT NULL,
     "description" TEXT NOT NULL,
-    "projectId" INTEGER NOT NULL,
+    "project_id" INTEGER NOT NULL,
 
-    PRIMARY KEY ("outcomeId"),
-    FOREIGN KEY ("projectId") REFERENCES "project"("projectId") ON DELETE CASCADE
+    PRIMARY KEY ("id"),
+    FOREIGN KEY ("project_id") REFERENCES "project"("id") ON DELETE CASCADE
 );
 
 CREATE TABLE "indicator" (
-    "assetId" TEXT NOT NULL,
-    "indicatorId" TEXT NOT NULL,
-    "alignedStrength" TEXT NOT NULL,
+    "project_id" TEXT NOT NULL,
+    "indicator_id" TEXT NOT NULL,
+    "aligned_strength" TEXT NOT NULL,
 
-    PRIMARY KEY ("assetId" , "indicatorId"),
-    FOREIGN KEY ("assetId") REFERENCES "project"("assetId") ON DELETE CASCADE
+    PRIMARY KEY ("project_id" , "indicator_id"),
+    FOREIGN KEY ("project_id") REFERENCES "project"("project_id") ON DELETE CASCADE
 );
 
 -- CreateIndex

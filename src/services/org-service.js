@@ -11,29 +11,35 @@ const OrgService = {
     createOrgUser(db, orgUserInfo) {
         return db   
         .insert(orgUserInfo)
-        .into('orgUser')
+        .into('org_user')
         .returning('*')
-        .then(([orgUser]) => orgUser)
+        .then(([org_user]) => org_user)
     },
     getOrgIdBasedOnUser(knex, userId) {
-        return knex('orgUser')
+        return knex('org_user')
         .select('*')
-        .where('userId', userId)
+        .where('user_id', userId)
     },
     getOrgs(db, orgId) {
         return db
         .select('*')
         .from('org')
-        .whereIn('orgId', orgId)
+        .whereIn('id', orgId)
     },
-
+    getById(knex, id) {
+        return knex('org')
+            .select('*')
+            .where({
+            'id': id
+        }).first()
+    },
     serializeOrg(org) {
         return {
-            orgId: org.orgId,
+            orgId: org.id,
             name: xss(org.name),
             url: xss(org.url),
             plan: org.plan,
-            planStatus: org.planStatus
+            plan_status: org.planStatus
         }
     }
 }

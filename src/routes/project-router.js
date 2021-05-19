@@ -2,6 +2,8 @@ const express = require('express')
 const xss = require('xss')
 const axios = require('axios')
 const ProjectService = require('../services/project-service')
+const OrgService = require('../services/org-service')
+const RoleService = require('../services/role-service')
 let Buffer = require('buffer/').Buffer
 let jwtCheck = require('../middleware/oAuth')
 const projectRouter = express.Router()
@@ -32,7 +34,8 @@ projectRouter
                         error: `No Projects` 
                     })
                 }
-                const projectIds = projectUser.map(item => item.projectId)
+                const projectIds = projectUser.map(item => item.project_id)
+                console.log(projectIds)
                 ProjectService.getProjects(
                     req.app.get('db'),
                     projectIds
@@ -45,8 +48,36 @@ projectRouter
             .catch(next)
  
     })
+projectRouter
+    .get('/:projectId', jwtCheck, jsonBodyParser, (req, res, next) => {
+        //Get userId
+        const authHeader = req.headers['authorization']
+        const token = authHeader && authHeader.split(' ')[1]
+    
+        if (token == null) return res.status(401)
+        
+        const decoded = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
+        const userId = decoded.sub
 
-    .post('/create', jwtCheck, jsonBodyParser, (req, res, next) => {
+        ProjectService.checkProjectForUser(
+            req.app.get('db'),
+            userId,
+            req.params.projectId
+        )
+            .then(metaUserProjectInfo => {
+                if(metaUserProjectInfo.length === 0) {
+                    return res.status(400).json({
+                        error: `No Projects` 
+                    })
+                } else {
+                    res.json(metaUserProjectInfo)
+                }
+                
+            }).catch(next)
+    })
+
+projectRouter
+    .post('/create', jwtCheck, jsonBodyParser, getRoleId, orgExists, (req, res, next) => {
             //Get userId
         const authHeader = req.headers['authorization']
         const token = authHeader && authHeader.split(' ')[1]
@@ -55,6 +86,7 @@ projectRouter
         
         const decoded = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
         const userId = decoded.sub
+        const roleId = req.roleId
         
             //deconstruct req.body
         const {name, description, projectImpacts, outcomesDesired, beneficiaries, orgId } = req.body
@@ -64,15 +96,15 @@ projectRouter
         const newProject = {
             name: xss(name), 
             description: xss(description),
-            orgId: orgId
+            org_id: orgId
         }
 
             //reconstruct projectObject to send to Gateway api
         let theObj = {
             name: xss(name), 
             description: xss(description),
-            projectImpacts: projectImpacts,
-            outcomesDesired: outcomesDesired
+            project_impacts: projectImpacts,
+            outcomes_desired: outcomesDesired
         }
     
         
@@ -90,11 +122,12 @@ projectRouter
             newProject
         )
             .then(project => {
+                console.log('test')
                     //once project is created.. create impact entry with projectId as FK
                 let newImpacts = []
                 projectImpacts.map(impact => {
                     newImpacts.push({
-                        "projectId": project.projectId, 
+                        "project_id": project.id, 
                         "description": xss(impact)
                     })
                 })
@@ -108,7 +141,7 @@ projectRouter
                         let newOutcomes = []
                         outcomesDesired.map(outcome => {
                             newOutcomes.push({
-                                "projectId": project.projectId, 
+                                "project_id": project.id, 
                                 "description": xss(outcome)
                             })
                         })
@@ -121,17 +154,17 @@ projectRouter
                                 ProjectService.createProjectUser(
                                     req.app.get('db'),
                                     {
-                                        projectId: project.projectId,
-                                        userId: userId
-
+                                        project_id: project.project_id,
+                                        user_id: userId,
+                                        role_id: roleId
                                     }
                                 )
                                     .then(projectUser => {
-                                        if(beneficiaries) {
-                                            setBeneficiaries(project.projectId, beneficiaries)
+                                        if(beneficiaries.length > 0) {
+                                            setBeneficiaries(project.id, beneficiaries)
                                         }
                                           // Need to change projectId to assetId? 
-                                        theObj.projectId = project.assetId
+                                        theObj.projectId = project.project_id
                                             //send project to DS to get the indicators to the project
                                         getIndicators(theObj)
                                     })
@@ -143,9 +176,9 @@ projectRouter
                 const newBeneficiaries = []
                 beneficiaries.map(beneficiary => {
                     newBeneficiaries.push({
-                        "projectId": projectId, 
+                        "project_id": projectId, 
                         "name": xss(beneficiary.name), 
-                        "lifeChange": xss(beneficiary.lifeChange)
+                        "life_change": xss(beneficiary.lifeChange)
                     })
                 })
                 ProjectService.createBeneficiaries(
@@ -164,7 +197,7 @@ projectRouter
                                             })
                                         } else {
                                             newDemographics.push({
-                                                "beneficiaryId": beneficiaryRes[i].beneficiaryId,
+                                                "beneficiary_id": beneficiaryRes[i].id,
                                                 "name": xss(beneficiaries[i].demographics[j].name),
                                                 "operator": xss(beneficiaries[i].demographics[j].operator),
                                                 "value": xss(beneficiaries[i].demographics[j].value)
@@ -190,9 +223,9 @@ projectRouter
                         let concatIndicators = []
                         indicators.data.indicators.map(indicator => {
                             concatIndicators.push({
-                                "assetId": indicators.data.projectId, 
-                                "indicatorId": indicator.indicatorId,
-                                "alignedStrength": indicator.alignedStrength
+                                "project_id": indicators.data.projectId, 
+                                "indicator_id": indicator.indicatorId,
+                                "aligned_strength": indicator.alignedStrength
                             })
                         })
                         ProjectService.createIndicators(
@@ -206,5 +239,53 @@ projectRouter
                     }).catch(next)
             }
     })
+
+    function getRoleId(req, res, next) {
+        const roleName = req.body.role
+
+        if(roleName) {
+            RoleService.getByName(
+                req.app.get('db'),
+                role
+            )
+            .then(res => {
+                console.log(res.id)
+                next()
+            }).catch(next)
+        } else {
+            RoleService.getByName(
+                req.app.get('db'),
+                "PROJECT_OWNER"
+            )
+            .then(res => {
+                req.roleId = res.id
+                next()
+            }).catch(next)
+        }
+        
+    }
+
+    function orgExists(req, res, next) {
+        const orgId = req.body.orgId
+        if(orgId) {
+            OrgService.getById(
+                req.app.get('db'),
+                orgId
+            )
+            .then(org => {
+                if(!org) {
+                    return res.status(400).json({
+                        error: `Organisation does not exist` 
+                    })
+                } else {
+                    next()
+                }
+            }).catch(next)
+        } else {
+            return res.status(400).json({
+                error: `Missing '${field}' in request body`
+            })
+        }
+    }
 
 module.exports = projectRouter

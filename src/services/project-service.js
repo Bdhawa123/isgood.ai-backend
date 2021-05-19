@@ -29,20 +29,36 @@ const ProjectService = {
     createProjectUser(db, projectUserInfo) {
         return db   
         .insert(projectUserInfo)
-        .into('projectUser')
+        .into('project_user')
         .returning('*')
-        .then(([projectUser]) => projectUser)
+        .then(([project_user]) => project_user)
     },
     getProjectIdBasedOnUser(knex, userId) {
-        return knex('projectUser')
+        return knex('project_user')
         .select('*')
-        .where('userId', userId)
+        .where('user_id', userId)
     },
     getProjects(db, projectId) {
         return db
         .select('*')
         .from('project')
-        .whereIn('projectId', projectId)
+        .whereIn('project_id', projectId)
+    },
+    checkProjectForUser(knex, userId, projectId) {
+        return knex('project_user')
+            .select('*')
+            .where({
+                'user_id': userId,
+                'project_id': projectId
+            })
+    },
+    getById(knex, id) {
+        return knex('project')
+            .select('*')
+            .where({
+            // 'user_id': userId,
+            'project_id': id
+        }).first()
     }
 }
 
