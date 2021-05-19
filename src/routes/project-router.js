@@ -2,6 +2,7 @@ const express = require('express')
 const xss = require('xss')
 const axios = require('axios')
 const ProjectService = require('../services/project-service')
+const OrgService = require('../services/org-service')
 const RoleService = require('../services/role-service')
 let Buffer = require('buffer/').Buffer
 let jwtCheck = require('../middleware/oAuth')
@@ -57,7 +58,6 @@ projectRouter
         
         const decoded = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
         const userId = decoded.sub
-        console.log(req.params.projectId)
 
         ProjectService.checkProjectForUser(
             req.app.get('db'),
@@ -74,12 +74,10 @@ projectRouter
                 }
                 
             }).catch(next)
-
-
     })
 
 projectRouter
-    .post('/create', jwtCheck, jsonBodyParser, getRoleId, (req, res, next) => {
+    .post('/create', jwtCheck, jsonBodyParser, getRoleId, orgExists, (req, res, next) => {
             //Get userId
         const authHeader = req.headers['authorization']
         const token = authHeader && authHeader.split(' ')[1]
@@ -124,6 +122,7 @@ projectRouter
             newProject
         )
             .then(project => {
+                console.log('test')
                     //once project is created.. create impact entry with projectId as FK
                 let newImpacts = []
                 projectImpacts.map(impact => {
@@ -264,6 +263,29 @@ projectRouter
             }).catch(next)
         }
         
+    }
+
+    function orgExists(req, res, next) {
+        const orgId = req.body.orgId
+        if(orgId) {
+            OrgService.getById(
+                req.app.get('db'),
+                orgId
+            )
+            .then(org => {
+                if(!org) {
+                    return res.status(400).json({
+                        error: `Organisation does not exist` 
+                    })
+                } else {
+                    next()
+                }
+            }).catch(next)
+        } else {
+            return res.status(400).json({
+                error: `Missing '${field}' in request body`
+            })
+        }
     }
 
 module.exports = projectRouter
