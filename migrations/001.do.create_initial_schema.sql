@@ -21,7 +21,25 @@ END;
 $$ LANGUAGE plpgsql VOLATILE;
 
 -- CreateEnum
-CREATE TYPE "Role" AS ENUM ('ADMIN', 'ORGANIZATION_OWNER', 'PROJECT_OWNER', 'PROJECT_MANAGER', 'COLLABORATOR', 'GUEST_VIEW', 'USER');
+-- CREATE TYPE "Role" AS ENUM ('ADMIN', 'ORGANIZATION_OWNER', 'PROJECT_OWNER', 'PROJECT_MANAGER', 'COLLABORATOR', 'GUEST_VIEW', 'USER');
+
+-- CreateTable 
+CREATE TABLE "roles" (
+    "id" SERIAL NOT NULL,
+    "name" VARCHAR(255) NOT NULL,
+
+    PRIMARY KEY ("id")
+);
+
+INSERT INTO "roles" (name)
+VALUES
+('ADMIN'),
+('ORGANIZATION_OWNER'),
+('PROJECT_OWNER'),
+('PROJECT_MANAGER'),
+('COLLABORATOR'),
+('GUEST_VIEW'),
+('USER');
 
 
 -- CreateTable
@@ -73,13 +91,14 @@ CREATE TABLE "org_user" (
     "id" SERIAL NOT NULL,
     "org_id" INTEGER NOT NULL,
     "user_id" TEXT NOT NULL,
-    "role" "Role" NOT NULL DEFAULT E'ORGANIZATION_OWNER',
+    "role_id" INTEGER NOT NULL,
     "invitation_token" TEXT,
     "status" BOOLEAN NOT NULL DEFAULT true,
     "created_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     PRIMARY KEY ("id"),
-    FOREIGN KEY ("org_id") REFERENCES "org"("id") ON DELETE CASCADE
+    FOREIGN KEY ("org_id") REFERENCES "org"("id") ON DELETE CASCADE,
+    FOREIGN KEY ("role_id") REFERENCES "roles"("id")
 );
 
 -- CreateTable
@@ -87,12 +106,13 @@ CREATE TABLE "project_user" (
     "id" SERIAL NOT NULL,
     "project_id" TEXT NOT NULL,
     "user_id" TEXT NOT NULL,
-    "role" "Role" NOT NULL DEFAULT E'PROJECT_OWNER',
+    "role_id" INTEGER NOT NULL,
     "status" BOOLEAN NOT NULL DEFAULT true,
     "created_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     PRIMARY KEY ("id"),
-    FOREIGN KEY ("project_id") REFERENCES "project"("project_id") ON DELETE CASCADE
+    FOREIGN KEY ("project_id") REFERENCES "project"("project_id") ON DELETE CASCADE,
+    FOREIGN KEY ("role_id") REFERENCES "roles"("id")
 );
 
 -- CreateTable

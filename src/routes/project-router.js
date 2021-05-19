@@ -2,6 +2,7 @@ const express = require('express')
 const xss = require('xss')
 const axios = require('axios')
 const ProjectService = require('../services/project-service')
+const RoleService = require('../services/role-service')
 let Buffer = require('buffer/').Buffer
 let jwtCheck = require('../middleware/oAuth')
 const projectRouter = express.Router()
@@ -32,7 +33,8 @@ projectRouter
                         error: `No Projects` 
                     })
                 }
-                const projectIds = projectUser.map(item => item.projectId)
+                const projectIds = projectUser.map(item => item.project_id)
+                console.log(projectIds)
                 ProjectService.getProjects(
                     req.app.get('db'),
                     projectIds
@@ -77,7 +79,7 @@ projectRouter
     })
 
 projectRouter
-    .post('/create', jwtCheck, jsonBodyParser, (req, res, next) => {
+    .post('/create', jwtCheck, jsonBodyParser, getRoleId, (req, res, next) => {
             //Get userId
         const authHeader = req.headers['authorization']
         const token = authHeader && authHeader.split(' ')[1]
@@ -86,6 +88,7 @@ projectRouter
         
         const decoded = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
         const userId = decoded.sub
+        const roleId = req.roleId
         
             //deconstruct req.body
         const {name, description, projectImpacts, outcomesDesired, beneficiaries, orgId } = req.body
@@ -152,9 +155,9 @@ projectRouter
                                 ProjectService.createProjectUser(
                                     req.app.get('db'),
                                     {
-                                        project_id: project.projectId,
-                                        userId: userId
-
+                                        project_id: project.project_id,
+                                        user_id: userId,
+                                        role_id: roleId
                                     }
                                 )
                                     .then(projectUser => {
@@ -176,7 +179,7 @@ projectRouter
                     newBeneficiaries.push({
                         "project_id": projectId, 
                         "name": xss(beneficiary.name), 
-                        "lifeChange": xss(beneficiary.lifeChange)
+                        "life_change": xss(beneficiary.lifeChange)
                     })
                 })
                 ProjectService.createBeneficiaries(
@@ -237,5 +240,30 @@ projectRouter
                     }).catch(next)
             }
     })
+
+    function getRoleId(req, res, next) {
+        const roleName = req.body.role
+
+        if(roleName) {
+            RoleService.getByName(
+                req.app.get('db'),
+                role
+            )
+            .then(res => {
+                console.log(res.id)
+                next()
+            }).catch(next)
+        } else {
+            RoleService.getByName(
+                req.app.get('db'),
+                "PROJECT_OWNER"
+            )
+            .then(res => {
+                req.roleId = res.id
+                next()
+            }).catch(next)
+        }
+        
+    }
 
 module.exports = projectRouter
