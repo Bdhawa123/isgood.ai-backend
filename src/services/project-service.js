@@ -40,7 +40,7 @@ const ProjectService = {
     },
     getProjects(db, projectId) {
         return db
-        .select('*')
+        .select('project_id', 'name', 'description')
         .from('project')
         .whereIn('project_id', projectId)
     },
