@@ -54,7 +54,7 @@ const ProjectService = {
     },
     getById(knex, id) {
         return knex('project')
-            .select('*')
+            .select('project_id', 'name', 'description', 'geolocation', 'start_date', 'end_date', )
             .where({
             'project_id': id
         }).first()
@@ -65,6 +65,18 @@ const ProjectService = {
         .from('indicator')
         .where({'project_id': projectId})
     },
+    getImpacts(db, id) {
+        return db
+        .select('description')
+        .from('impact')
+        .where('project_id', id)
+    },
+    getOutcomes(db, id) {
+        return db
+        .select('description')
+        .from('outcome')
+        .where('project_id', id)
+    }
 }
 
 module.exports = ProjectService

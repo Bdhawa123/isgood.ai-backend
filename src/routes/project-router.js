@@ -40,7 +40,7 @@ projectRouter
  
     })
 projectRouter
-    .get('/:projectId', jwtCheck, jsonBodyParser, getIndicatorsDesc, (req, res, next) => {
+    .get('/:projectId', jwtCheck, jsonBodyParser, handleIndicatorsDesc, (req, res, next) => {
         const userId = req.user.sub
 
         ProjectService.checkProjectForUser(
@@ -54,19 +54,36 @@ projectRouter
                         error: `No Projects` 
                     })
                 }
-                ProjectService.getById(
+                ProjectService.getImpacts(
                     req.app.get('db'),
-                    metaUserProjectInfo.project_id
+                    metaUserProjectInfo.id
                 )
-                    .then(project => {
-                        project.indicators = req.indicators
-                        res.status(200).json(project)
+                    .then(impacts => {
+                        let impactsDescription = impacts.map(impact => impact.description)
+                        ProjectService.getOutcomes(
+                            req.app.get('db'),
+                            metaUserProjectInfo.id
+                        )
+                            .then(outcomes => {
+                                let outcomesDescription = outcomes.map(outcome => outcome.description)
+                                ProjectService.getById(
+                                    req.app.get('db'),
+                                    metaUserProjectInfo.project_id
+                                )
+                                    .then(project => {
+                                        project.impacts = impactsDescription
+                                        project.outcomes = outcomesDescription
+                                        project.indicators = req.indicators
+                                        res.status(200).json(project)
+                                    }) 
+                            })
+                        
                     })
-                
             }).catch(next)
     })
 
-    function getIndicatorsDesc(req, res, next){
+
+    function handleIndicatorsDesc(req, res, next){
         ProjectService.getIndicators(
             req.app.get('db'),
             req.params.projectId
@@ -77,23 +94,42 @@ projectRouter
                         error: `Either project does not exist or there are no indicators for the project` 
                     })
                 }
-                console.log(metaIndicatorInfo)
+                let ids = metaIndicatorInfo.map(indicator => indicator.indicator_id)
+                let indicators = getIndicatorDesc(ids)
+                let completeIndicators = []
+                for(let i = 0; i < indicators.length; i++) {
+                    for(let j = 0; j < metaIndicatorInfo.length; j++) {
+                        if(indicators[i].id == metaIndicatorInfo[j].indicator_id) {
+                            completeIndicators.push({
+                                'indicator_id': metaIndicatorInfo[j].indicator_id,
+                                'description': indicators[i].description,
+                                'aligned_strength': metaIndicatorInfo[j].aligned_strength
+                            })
+                        }
+                    }
+                }
+                req.indicators = completeIndicators
             }).catch(next)
-        req.indicators = [
-            {
-                id: 1,
-                description: "This is a indicator description"
-            },
-            {
-                id: 2,
-                description: "This is a indicator description"
-            },
-            {
-                id: 3,
-                description: "This is a indicator description"
-            }
-        ]
+        
         next()
+
+        function getIndicatorDesc(ids) {
+            let indicators = [
+                {
+                    id: 1,
+                    description: "This is a indicator description"
+                },
+                {
+                    id: 2,
+                    description: "This is a indicator description"
+                },
+                {
+                    id: 3,
+                    description: "This is a indicator description"
+                }
+            ]
+            return indicators
+        }
     }
 
 projectRouter

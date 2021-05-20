@@ -61,4 +61,6 @@ POST
 api/project/create - (body must contain orgId, name, description, projectImpacts, and outcomesDesired)
 
 GET
-api/project - (returns * projects based on user... (not complete still needs to return projectImpacts, and outcomesDesired in response))
+api/project - (returns * projects based on user)
+
+api/project/projectId - (returns project info and indicators for the project)
