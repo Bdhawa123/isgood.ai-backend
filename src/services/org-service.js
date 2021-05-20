@@ -26,11 +26,11 @@ const OrgService = {
         .from('org')
         .whereIn('id', orgId)
     },
-    getById(knex, id) {
+    getByOrgId(knex, orgId) {
         return knex('org')
             .select('*')
             .where({
-            'id': id
+            'org_id': orgId
         }).first()
     },
     serializeOrg(org) {

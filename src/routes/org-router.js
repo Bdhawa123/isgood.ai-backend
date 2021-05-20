@@ -86,7 +86,7 @@ orgRouter
                     req.app.get('db'),
                     {
                         user_id: userId,
-                        org_id: org.id,
+                        org_id: org.org_id,
                         role_id: roleId
                     }
                 )

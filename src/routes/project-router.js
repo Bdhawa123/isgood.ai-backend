@@ -322,7 +322,7 @@ projectRouter
     function orgExists(req, res, next) {
         const orgId = req.body.orgId
         if(orgId) {
-            OrgService.getById(
+            OrgService.getByOrgId(
                 req.app.get('db'),
                 orgId
             )

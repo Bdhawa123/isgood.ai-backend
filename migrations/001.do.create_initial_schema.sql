@@ -80,16 +80,16 @@ CREATE TABLE "project" (
     "geolocation" TEXT,
     "start_date" TIMESTAMPTZ,
     "end_date" TIMESTAMPTZ,
-    "org_id" INTEGER,
+    "org_id" TEXT,
 
     PRIMARY KEY ("id"),
-    FOREIGN KEY ("org_id") REFERENCES "org"("id") ON DELETE CASCADE
+    FOREIGN KEY ("org_id") REFERENCES "org"("org_id") ON DELETE CASCADE
 );
 
 -- CreateTable
 CREATE TABLE "org_user" (
     "id" SERIAL NOT NULL,
-    "org_id" INTEGER NOT NULL,
+    "org_id" TEXT NOT NULL,
     "user_id" TEXT NOT NULL,
     "role_id" INTEGER NOT NULL,
     "invitation_token" TEXT,
@@ -97,7 +97,7 @@ CREATE TABLE "org_user" (
     "created_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     PRIMARY KEY ("id"),
-    FOREIGN KEY ("org_id") REFERENCES "org"("id") ON DELETE CASCADE,
+    FOREIGN KEY ("org_id") REFERENCES "org"("org_id") ON DELETE CASCADE,
     FOREIGN KEY ("role_id") REFERENCES "roles"("id")
 );
 
