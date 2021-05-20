@@ -50,15 +50,32 @@ const ProjectService = {
             .where({
                 'user_id': userId,
                 'project_id': projectId
-            })
+            }).first()
     },
     getById(knex, id) {
         return knex('project')
-            .select('*')
+            .select('project_id', 'name', 'description', 'geolocation', 'start_date', 'end_date', )
             .where({
-            // 'user_id': userId,
             'project_id': id
         }).first()
+    },
+    getIndicators(db, projectId) {
+        return db
+        .select('*')
+        .from('indicator')
+        .where({'project_id': projectId})
+    },
+    getImpacts(db, id) {
+        return db
+        .select('description')
+        .from('impact')
+        .where('project_id', id)
+    },
+    getOutcomes(db, id) {
+        return db
+        .select('description')
+        .from('outcome')
+        .where('project_id', id)
     }
 }
 

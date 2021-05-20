@@ -109,9 +109,15 @@ orgRouter
                 req.app.get('db'),
                 role
             )
-            .then(res => {
-                console.log(res.id)
-                next()
+            .then(roleId => {
+                if(!roleId) {
+                    return res.status(400).json({
+                        error: `Role '${roleName}' does not exist` 
+                    })
+                } else {
+                    req.roleId = roleId.id
+                    next()
+                }
             }).catch(next)
         } else {
             RoleService.getByName(
