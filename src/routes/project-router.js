@@ -13,16 +13,8 @@ const jsonBodyParser = express.json()
   
 
 projectRouter
-    
     .get('/', jwtCheck, jsonBodyParser, (req, res, next) => {
-        //Get userId
-        const authHeader = req.headers['authorization']
-        const token = authHeader && authHeader.split(' ')[1]
-    
-        if (token == null) return res.status(401)
-        
-        const decoded = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
-        const userId = decoded.sub
+        const userId = req.user.sub
 
         ProjectService.getProjectIdBasedOnUser(
             req.app.get('db'),
@@ -35,7 +27,6 @@ projectRouter
                     })
                 }
                 const projectIds = projectUser.map(item => item.project_id)
-                console.log(projectIds)
                 ProjectService.getProjects(
                     req.app.get('db'),
                     projectIds
@@ -49,15 +40,8 @@ projectRouter
  
     })
 projectRouter
-    .get('/:projectId', jwtCheck, jsonBodyParser, (req, res, next) => {
-        //Get userId
-        const authHeader = req.headers['authorization']
-        const token = authHeader && authHeader.split(' ')[1]
-    
-        if (token == null) return res.status(401)
-        
-        const decoded = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
-        const userId = decoded.sub
+    .get('/:projectId', jwtCheck, jsonBodyParser, getIndicatorsDesc, (req, res, next) => {
+        const userId = req.user.sub
 
         ProjectService.checkProjectForUser(
             req.app.get('db'),
@@ -65,27 +49,57 @@ projectRouter
             req.params.projectId
         )
             .then(metaUserProjectInfo => {
-                if(metaUserProjectInfo.length === 0) {
+                if(!metaUserProjectInfo) {
                     return res.status(400).json({
                         error: `No Projects` 
                     })
-                } else {
-                    res.json(metaUserProjectInfo)
                 }
+                ProjectService.getById(
+                    req.app.get('db'),
+                    metaUserProjectInfo.project_id
+                )
+                    .then(project => {
+                        project.indicators = req.indicators
+                        res.status(200).json(project)
+                    })
                 
             }).catch(next)
     })
 
+    function getIndicatorsDesc(req, res, next){
+        ProjectService.getIndicators(
+            req.app.get('db'),
+            req.params.projectId
+        )
+            .then(metaIndicatorInfo => {
+                if(metaIndicatorInfo.length === 0) {
+                    return res.status(400).json({
+                        error: `Either project does not exist or there are no indicators for the project` 
+                    })
+                }
+                console.log(metaIndicatorInfo)
+            }).catch(next)
+        req.indicators = [
+            {
+                id: 1,
+                description: "This is a indicator description"
+            },
+            {
+                id: 2,
+                description: "This is a indicator description"
+            },
+            {
+                id: 3,
+                description: "This is a indicator description"
+            }
+        ]
+        next()
+    }
+
 projectRouter
     .post('/create', jwtCheck, jsonBodyParser, getRoleId, orgExists, (req, res, next) => {
-            //Get userId
-        const authHeader = req.headers['authorization']
-        const token = authHeader && authHeader.split(' ')[1]
-    
-        if (token == null) return res.status(401)
         
-        const decoded = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
-        const userId = decoded.sub
+        const userId = req.user.sub
         const roleId = req.roleId
         
             //deconstruct req.body
@@ -122,7 +136,6 @@ projectRouter
             newProject
         )
             .then(project => {
-                console.log('test')
                     //once project is created.. create impact entry with projectId as FK
                 let newImpacts = []
                 projectImpacts.map(impact => {
@@ -242,15 +255,20 @@ projectRouter
 
     function getRoleId(req, res, next) {
         const roleName = req.body.role
-
         if(roleName) {
             RoleService.getByName(
                 req.app.get('db'),
-                role
+                roleName
             )
-            .then(res => {
-                console.log(res.id)
-                next()
+            .then(roleId => {
+                if(!roleId) {
+                    return res.status(400).json({
+                        error: `Role '${roleName}' does not exist` 
+                    })
+                } else {
+                    req.roleId = roleId.id
+                    next()
+                }
             }).catch(next)
         } else {
             RoleService.getByName(

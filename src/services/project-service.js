@@ -50,16 +50,21 @@ const ProjectService = {
             .where({
                 'user_id': userId,
                 'project_id': projectId
-            })
+            }).first()
     },
     getById(knex, id) {
         return knex('project')
             .select('*')
             .where({
-            // 'user_id': userId,
             'project_id': id
         }).first()
-    }
+    },
+    getIndicators(db, projectId) {
+        return db
+        .select('*')
+        .from('indicator')
+        .where({'project_id': projectId})
+    },
 }
 
 module.exports = ProjectService
