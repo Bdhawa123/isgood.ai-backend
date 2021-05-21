@@ -40,7 +40,7 @@ const ProjectService = {
     },
     getProjects(db, projectId) {
         return db
-        .select('project_id', 'name', 'description')
+        .select('project_id', 'name', 'description', 'org_id')
         .from('project')
         .whereIn('project_id', projectId)
     },
@@ -54,7 +54,7 @@ const ProjectService = {
     },
     getById(knex, id) {
         return knex('project')
-            .select('project_id', 'name', 'description', 'geolocation', 'start_date', 'end_date', )
+            .select('project_id', 'name', 'description', 'geolocation', 'start_date', 'end_date', 'org_id')
             .where({
             'project_id': id
         }).first()

@@ -9,16 +9,19 @@ Complete the following steps to get started:
 1. Clone this repository to your local machine `git clone "URL" isgood.ai-backend`
 2. `cd` into the cloned repository
 3. Install the node dependencies `npm install`
-4. Create an `.env` that will be ignored by git and read by the express server 
-5. Edit the `.env` file 
-    NODE_ENV=development
-    PORT=8000
-    DATABASE_URL="postgresql://USERNAME@localhost/DATABASENAME"
-    TEST_DATABASE_URL="postgresql://USERNAME@localhost/DATABASENAME_test"
-    JWT_SECRET="my-own-special-jwt-secret"
-    JWT_EXPIRY="5h"
-    CLIENT_ID=""
-    CLIENT_SECRET=""
+4. Create an `.env` that will be ignored by git and read by the express server
+5. Edit the `.env` file
+   NODE_ENV=development
+   PORT=8000
+   DATABASE_URL="postgresql://USERNAME@localhost/DATABASENAME"
+   TEST_DATABASE_URL="postgresql://USERNAME@localhost/DATABASENAME_test"
+   JWT_SECRET="my-own-special-jwt-secret"
+   JWT_EXPIRY="5h"
+   CLIENT_ID=""
+   CLIENT_SECRET=""
+   AUTH0_DOMAIN=""
+   CLIENT_ID_MANAGEMENT=""
+   CLIENT_SECRET_MANAGEMENT=""
 6. Create a database with DATABASENAME and your USERNAME
 7. Run `npm run migrate` to create tables
 8. Run `npm run dev` to start nodemon
@@ -33,7 +36,6 @@ Migrations `npm run migrate`
 
 Run the tests `npm test`
 
-
 ## Docs
 
 Protected Endpoints need an Authorization header containing the Bearer token
@@ -45,7 +47,6 @@ api/users/register - (body must contain firstName, lastName, email, password)
 ### Login
 
 api/auth/login - (body must include email and password)
-
 
 ### Organization
 
@@ -61,6 +62,6 @@ POST
 api/project/create - (body must contain orgId, name, description, projectImpacts, and outcomesDesired)
 
 GET
-api/project - (returns * projects based on user)
+api/project - (returns \* projects based on user)
 
 api/project/projectId - (returns project info and indicators for the project)
