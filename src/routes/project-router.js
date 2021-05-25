@@ -23,7 +23,7 @@ projectRouter
             .then(projectUser => {
                 if(!projectUser) {
                     return res.status(400).json({
-                        error: `No Projects` 
+                        error: {message: `No Projects`} 
                     })
                 }
                 const projectIds = projectUser.map(item => item.project_id)
@@ -51,7 +51,7 @@ projectRouter
             .then(metaUserProjectInfo => {
                 if(!metaUserProjectInfo) {
                     return res.status(400).json({
-                        error: `No Projects` 
+                        error: {message: `No Projects`} 
                     })
                 }
                 ProjectService.getImpacts(
@@ -82,6 +82,23 @@ projectRouter
             }).catch(next)
     })
 
+    .patch('/projectId', jwtCheck, jsonBodyParser, (req, res, next) => {
+        const userId = req.user.sub
+
+        ProjectService.checkProjectForUser(
+            req.app.get('db'),
+            userId,
+            req.params.projectId
+        )
+            .then(metaUserProjectInfo => {
+                if(!metaUserProjectInfo) {
+                    return res.status(400).json({
+                        error: {message: `No Projects`} 
+                    })
+                }
+            }).catch(next)
+    })
+
 
     function handleIndicatorsDesc(req, res, next){
         ProjectService.getIndicators(
@@ -91,7 +108,7 @@ projectRouter
             .then(metaIndicatorInfo => {
                 if(metaIndicatorInfo.length === 0) {
                     return res.status(400).json({
-                        error: `Either project does not exist or there are no indicators for the project` 
+                        error: {message: `Either project does not exist or there are no indicators for the project`} 
                     })
                 }
                 let ids = metaIndicatorInfo.map(indicator => indicator.indicator_id)
@@ -163,7 +180,7 @@ projectRouter
         for (const field of ['name', 'description', 'projectImpacts', 'outcomesDesired', 'orgId'])
         if (!req.body[field])
             return res.status(400).json({
-                error: `Missing '${field}' in request body`
+                error: {message: `Missing '${field}' in request body`}
             })
         
             //create project table
@@ -242,7 +259,7 @@ projectRouter
                                 for(let j = 0; j < beneficiaries[i].demographics.length; j++) {
                                         if (!beneficiaries[i].demographics[j].name || !beneficiaries[i].demographics[j].operator || !beneficiaries[i].demographics[j].value) {
                                             return res.status(400).json({
-                                                error: `Name, operator, and value required in demographics request body`
+                                                error: {message: `Name, operator, and value required in demographics request body`}
                                             })
                                         } else {
                                             newDemographics.push({
@@ -267,8 +284,9 @@ projectRouter
 
             function getIndicators(theObj) {
                     //Will be a post request but the endpoint is not functioning yet. Using jsonServer for now to create dummy data
-                axios.post('https://feirpqbvp3.execute-api.us-east-2.amazonaws.com/test/echo', theObj) 
+                axios.post('https://9deylj26rg.execute-api.us-east-2.amazonaws.com/test', theObj) 
                     .then(indicators => {
+                        console.log(indicators.data.indicators)
                         let concatIndicators = []
                         indicators.data.indicators.map(indicator => {
                             concatIndicators.push({
@@ -299,7 +317,7 @@ projectRouter
             .then(roleId => {
                 if(!roleId) {
                     return res.status(400).json({
-                        error: `Role '${roleName}' does not exist` 
+                        error: {message: `Role '${roleName}' does not exist`} 
                     })
                 } else {
                     req.roleId = roleId.id
@@ -329,7 +347,7 @@ projectRouter
             .then(org => {
                 if(!org) {
                     return res.status(400).json({
-                        error: `Organisation does not exist` 
+                        error: {message: `Organisation does not exist`} 
                     })
                 } else {
                     next()
@@ -337,9 +355,11 @@ projectRouter
             }).catch(next)
         } else {
             return res.status(400).json({
-                error: `Missing '${field}' in request body`
+                error: {message: `Missing '${field}' in request body`}
             })
         }
     }
+
+
 
 module.exports = projectRouter
