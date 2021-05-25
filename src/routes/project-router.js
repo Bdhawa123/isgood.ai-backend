@@ -82,6 +82,23 @@ projectRouter
             }).catch(next)
     })
 
+    .patch('/projectId', jwtCheck, jsonBodyParser, (req, res, next) => {
+        const userId = req.user.sub
+
+        ProjectService.checkProjectForUser(
+            req.app.get('db'),
+            userId,
+            req.params.projectId
+        )
+            .then(metaUserProjectInfo => {
+                if(!metaUserProjectInfo) {
+                    return res.status(400).json({
+                        error: `No Projects` 
+                    })
+                }
+            }).catch(next)
+    })
+
 
     function handleIndicatorsDesc(req, res, next){
         ProjectService.getIndicators(
@@ -267,8 +284,9 @@ projectRouter
 
             function getIndicators(theObj) {
                     //Will be a post request but the endpoint is not functioning yet. Using jsonServer for now to create dummy data
-                axios.post('https://feirpqbvp3.execute-api.us-east-2.amazonaws.com/test/echo', theObj) 
+                axios.post('https://9deylj26rg.execute-api.us-east-2.amazonaws.com/test', theObj) 
                     .then(indicators => {
+                        console.log(indicators.data.indicators)
                         let concatIndicators = []
                         indicators.data.indicators.map(indicator => {
                             concatIndicators.push({
@@ -341,5 +359,7 @@ projectRouter
             })
         }
     }
+
+
 
 module.exports = projectRouter

@@ -76,7 +76,16 @@ const ProjectService = {
         .select('description')
         .from('outcome')
         .where('project_id', id)
-    }
+    },
+    updateProject(knex, projectId, newProjectsFields) {
+        return knex('project')
+            .where({ projectId })
+            .update(newProjectsFields)
+            .returning('*')
+            .then(rows => {
+                return rows[0]
+            })
+    },
 }
 
 module.exports = ProjectService
