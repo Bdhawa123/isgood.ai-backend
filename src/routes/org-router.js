@@ -68,7 +68,7 @@ orgRouter
         for (const field of ['name', 'url'])
             if (!req.body[field])
                 return res.status(400).json({
-                    error: `Missing '${field}' in request body`
+                    error: {message: `Missing '${field}' in request body`}
                 })
             //Whats a good way to set these as default? 
         newOrg.plan = "free"
@@ -107,12 +107,12 @@ orgRouter
         if(roleName) {
             RoleService.getByName(
                 req.app.get('db'),
-                role
+                roleName
             )
             .then(roleId => {
                 if(!roleId) {
                     return res.status(400).json({
-                        error: `Role '${roleName}' does not exist` 
+                        error: {message: `Role '${roleName}' does not exist`} 
                     })
                 } else {
                     req.roleId = roleId.id
