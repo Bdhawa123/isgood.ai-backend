@@ -6,7 +6,7 @@
 
 
 
-
+DROP TABLE IF EXISTS life_change;
 DROP TABLE IF EXISTS demographic;
 DROP TABLE IF EXISTS beneficiary;
 DROP TABLE IF EXISTS org_user;
