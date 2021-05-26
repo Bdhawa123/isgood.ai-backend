@@ -121,11 +121,10 @@ CREATE TABLE "beneficiary" (
     "beneficiary_id" TEXT NOT NULL DEFAULT concat('bn-', generate_uid(6)) UNIQUE,
     "created_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "name" TEXT NOT NULL,
-    "life_change" TEXT NOT NULL,
-    "project_id" INTEGER,
+    "project_id" TEXT,
 
     PRIMARY KEY ("id"),
-    FOREIGN KEY ("project_id") REFERENCES "project"("id") ON DELETE CASCADE
+    FOREIGN KEY ("project_id") REFERENCES "project"("project_id") ON DELETE CASCADE
 );
 
 -- CreateTable
@@ -136,10 +135,21 @@ CREATE TABLE "demographic" (
     "name" TEXT NOT NULL,
     "operator" TEXT NOT NULL,
     "value" TEXT NOT NULL,
-    "beneficiary_id" INTEGER,
+    "beneficiary_id" TEXT,
 
     PRIMARY KEY ("id"),
-    FOREIGN KEY ("beneficiary_id") REFERENCES "beneficiary"("id") ON DELETE CASCADE
+    FOREIGN KEY ("beneficiary_id") REFERENCES "beneficiary"("beneficiary_id") ON DELETE CASCADE
+);
+
+-- CreateTable
+CREATE TABLE "life_change" (
+    "id" SERIAL NOT NULL,
+    "life_change_id" TEXT NOT NULL DEFAULT concat('lc-', generate_uid(6)) UNIQUE,
+    "beneficiary_id" TEXT NOT NULL,
+    "description" TEXT NOT NULL,
+
+    PRIMARY KEY ("id"),
+    FOREIGN KEY ("beneficiary_id") REFERENCES "beneficiary"("beneficiary_id") ON DELETE CASCADE
 );
 
 CREATE TABLE "impact" (

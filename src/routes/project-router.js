@@ -40,64 +40,120 @@ projectRouter
  
     })
 projectRouter
-    .get('/:projectId', jwtCheck, jsonBodyParser, handleIndicatorsDesc, (req, res, next) => {
-        const userId = req.user.sub
+    .get('/:projectId', jwtCheck, jsonBodyParser, checkProjectExists, handleIndicatorsDesc, getBeneficiaries, (req, res, next) => {
+        const {metaUserProjectInfo} = req
 
-        ProjectService.checkProjectForUser(
-            req.app.get('db'),
-            userId,
-            req.params.projectId
-        )
-            .then(metaUserProjectInfo => {
-                if(!metaUserProjectInfo) {
-                    return res.status(400).json({
-                        error: {message: `No Projects`} 
-                    })
-                }
+
                 ProjectService.getImpacts(
                     req.app.get('db'),
                     metaUserProjectInfo.id
                 )
                     .then(impacts => {
-                        let impactsDescription = impacts.map(impact => impact.description)
                         ProjectService.getOutcomes(
                             req.app.get('db'),
                             metaUserProjectInfo.id
                         )
                             .then(outcomes => {
-                                let outcomesDescription = outcomes.map(outcome => outcome.description)
                                 ProjectService.getById(
                                     req.app.get('db'),
                                     metaUserProjectInfo.project_id
                                 )
                                     .then(project => {
-                                        project.impacts = impactsDescription
-                                        project.outcomes = outcomesDescription
+                                        project.impacts = impacts
+                                        project.outcomes = outcomes
+                                        project.beneficiaries = req.beneficiaries
                                         project.indicators = req.indicators
                                         res.status(200).json(project)
                                     }) 
                             })
                         
-                    })
-            }).catch(next)
+                    }).catch(next)
+        
     })
 
-    .patch('/projectId', jwtCheck, jsonBodyParser, (req, res, next) => {
-        const userId = req.user.sub
-
-        ProjectService.checkProjectForUser(
+    function getBeneficiaries(req, res, next) {
+        let projectId = req.params.projectId
+        ProjectService.getBeneficiaries(
             req.app.get('db'),
-            userId,
-            req.params.projectId
+            projectId
         )
-            .then(metaUserProjectInfo => {
-                if(!metaUserProjectInfo) {
-                    return res.status(400).json({
-                        error: {message: `No Projects`} 
+            .then(beneficiaries => {
+                let beneficiaryIds = beneficiaries.map(beneficiary => beneficiary.beneficiary_id)
+                ProjectService.getLifeChange(
+                    req.app.get('db'),
+                    beneficiaryIds
+                )
+                    .then(lifeChanges => {
+                        let newBeneficiary = beneficiaries
+                        for(let i = 0; i < beneficiaries.length; i++){
+                            newBeneficiary[i].lifeChange = []
+                            for(let j = 0; j < lifeChanges.length; j++) {
+                                if(beneficiaries[i].beneficiary_id == lifeChanges[j].beneficiary_id) {
+                                    newBeneficiary[i].lifeChange.push({
+                                        'life_change_id': lifeChanges[j].life_change_id,
+                                        'description': lifeChanges[j].description
+                                    })
+                                }
+                            }
+                        }
+                        ProjectService.getDemographics(
+                            req.app.get('db'),
+                            beneficiaryIds
+                        )
+                            .then(demographics => {
+                                for(let i = 0; i < beneficiaries.length; i++){
+                                    newBeneficiary[i].demographics = []
+                                    for(let j = 0; j < demographics.length; j++){
+                                        if(beneficiaries[i].beneficiary_id == demographics[j].beneficiary_id) {
+                                            newBeneficiary[i].demographics.push({
+                                                'demographic_id': demographics[j].demographic_id,
+                                                'name': demographics[j].name,
+                                                'operator': demographics[j].operator,
+                                                'value': demographics[j].value
+                                            })
+                                        }
+                                    }
+                                }
+                                req.beneficiaries = newBeneficiary
+                            })
                     })
-                }
+
             }).catch(next)
-    })
+        next()
+    }
+
+// projectRouter
+//     .patch('/projectId', jwtCheck, jsonBodyParser, checkProjectExists, (req, res, next) => {
+//         const userId = req.user.sub
+//         const {name, description, projectImpacts, outcomesDesired, beneficiaries, startDate, endDate, coordinates } = req.body
+
+//              //make sure the fields are not empty
+//              for (const field of ['name', 'description', 'projectImpacts', 'outcomesDesired', 'orgId'])
+//              if (!req.body[field])
+//                  return res.status(400).json({
+//                      error: {message: `Missing '${field}' in request body`}
+//                  })
+
+//         const projectToUpdate = {
+//             name,
+//             description,
+//             project_impacts: projectImpacts,
+//             outcomes_desired: outcomesDesired,
+//             start_date: startDate,
+//             end_date: endDate
+//         }
+
+//         ProjectService.updateProject(
+//             req.app.get('db'),
+//             req.params.projectId,
+//             projectToUpdate
+//         )
+//             .then(project => {
+
+//             }).catch(next)
+
+
+//     })
 
 
     function handleIndicatorsDesc(req, res, next){
@@ -107,25 +163,25 @@ projectRouter
         )
             .then(metaIndicatorInfo => {
                 if(metaIndicatorInfo.length === 0) {
-                    return res.status(400).json({
-                        error: {message: `Either project does not exist or there are no indicators for the project`} 
-                    })
-                }
-                let ids = metaIndicatorInfo.map(indicator => indicator.indicator_id)
-                let indicators = getIndicatorDesc(ids)
-                let completeIndicators = []
-                for(let i = 0; i < indicators.length; i++) {
-                    for(let j = 0; j < metaIndicatorInfo.length; j++) {
-                        if(indicators[i].id == metaIndicatorInfo[j].indicator_id) {
-                            completeIndicators.push({
-                                'indicator_id': metaIndicatorInfo[j].indicator_id,
-                                'description': indicators[i].description,
-                                'aligned_strength': metaIndicatorInfo[j].aligned_strength
-                            })
+                    req.indicators = 'there was a problem fetching project indicators'
+                } else {
+                    let ids = metaIndicatorInfo.map(indicator => indicator.indicator_id)
+                    let indicators = getIndicatorDesc(ids)
+                    let completeIndicators = []
+                    for(let i = 0; i < indicators.length; i++) {
+                        for(let j = 0; j < metaIndicatorInfo.length; j++) {
+                            if(indicators[i].id == metaIndicatorInfo[j].indicator_id) {
+                                completeIndicators.push({
+                                    'indicator_id': metaIndicatorInfo[j].indicator_id,
+                                    'description': indicators[i].description,
+                                    'aligned_strength': metaIndicatorInfo[j].aligned_strength
+                                })
+                            }
                         }
                     }
+                    req.indicators = completeIndicators
                 }
-                req.indicators = completeIndicators
+                
             }).catch(next)
         
         next()
@@ -226,8 +282,8 @@ projectRouter
                                     }
                                 )
                                     .then(projectUser => {
-                                        if(beneficiaries.length > 0) {
-                                            setBeneficiaries(project.id, beneficiaries)
+                                        if(beneficiaries && beneficiaries.length > 0) {
+                                            setBeneficiaries(project.project_id, beneficiaries)
                                         }
                                           // Need to change projectId to assetId? 
                                         theObj.projectId = project.project_id
@@ -244,7 +300,6 @@ projectRouter
                     newBeneficiaries.push({
                         "project_id": projectId, 
                         "name": xss(beneficiary.name), 
-                        "life_change": xss(beneficiary.lifeChange)
                     })
                 })
                 ProjectService.createBeneficiaries(
@@ -253,31 +308,46 @@ projectRouter
                 )
                         //insert demographics into demographic table
                     .then(beneficiaryRes => {
-                        let newDemographics = []
+                        let lifeChanges = []
                         for(let i = 0; i < beneficiaries.length; i++) {
-                            if (beneficiaries[i].demographics) {
-                                for(let j = 0; j < beneficiaries[i].demographics.length; j++) {
-                                        if (!beneficiaries[i].demographics[j].name || !beneficiaries[i].demographics[j].operator || !beneficiaries[i].demographics[j].value) {
-                                            return res.status(400).json({
-                                                error: {message: `Name, operator, and value required in demographics request body`}
-                                            })
-                                        } else {
-                                            newDemographics.push({
-                                                "beneficiary_id": beneficiaryRes[i].id,
-                                                "name": xss(beneficiaries[i].demographics[j].name),
-                                                "operator": xss(beneficiaries[i].demographics[j].operator),
-                                                "value": xss(beneficiaries[i].demographics[j].value)
-                                            })
-                                        }
-                                }
+                            for(let j = 0; j < beneficiaries[i].lifeChange.length; j++) {
+                                lifeChanges.push({
+                                    "beneficiary_id": beneficiaryRes[i].beneficiary_id,
+                                    "description": xss(beneficiaries[i].lifeChange[j])
+                                })
                             }
                         }
-                        ProjectService.createDemographics(
+                        ProjectService.createLifeChange(
                             req.app.get('db'),
-                            newDemographics
+                            lifeChanges
                         )
-                            .then(demographics => {
-                                next
+                            .then(lifeChangesRes => {
+                                let newDemographics = []
+                                for(let i = 0; i < beneficiaries.length; i++) {
+                                    if (beneficiaries[i].demographics) {
+                                        for(let j = 0; j < beneficiaries[i].demographics.length; j++) {
+                                                if (!beneficiaries[i].demographics[j].name || !beneficiaries[i].demographics[j].operator || !beneficiaries[i].demographics[j].value) {
+                                                    return res.status(400).json({
+                                                        error: {message: `Name, operator, and value required in demographics request body`}
+                                                    })
+                                                } else {
+                                                    newDemographics.push({
+                                                        "beneficiary_id": beneficiaryRes[i].beneficiary_id,
+                                                        "name": xss(beneficiaries[i].demographics[j].name),
+                                                        "operator": xss(beneficiaries[i].demographics[j].operator),
+                                                        "value": xss(beneficiaries[i].demographics[j].value)
+                                                    })
+                                                }
+                                        }
+                                    }
+                                }
+                                ProjectService.createDemographics(
+                                    req.app.get('db'),
+                                    newDemographics
+                                )
+                                    .then(demographics => {
+                                        next
+                                    })
                             })
                     }).catch(next)    
             }
@@ -303,7 +373,12 @@ projectRouter
                             res.status(201)
                             .end()
                         })
-                    }).catch(next)
+                    }).catch(error => {
+                            res.status(201).send({
+                                error: {message: "There has been an issue fetching projects indicators"}
+                            })
+                        next()
+                    })
             }
     })
 
@@ -358,6 +433,28 @@ projectRouter
                 error: {message: `Missing '${field}' in request body`}
             })
         }
+    }
+
+    function checkProjectExists(req, res, next) {
+        const projectId = req.params.projectId
+        const userId = req.user.sub
+
+        ProjectService.checkProjectForUser(
+            req.app.get('db'),
+            userId,
+            projectId
+        )
+            .then(metaUserProjectInfo => {
+                if(!metaUserProjectInfo) {
+                    return res.status(400).json({
+                        error: {message: `No Projects`} 
+                    })
+                } else {
+                    req.metaUserProjectInfo = metaUserProjectInfo
+                    next()
+                }
+            }).catch(next)
+
     }
 
 

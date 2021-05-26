@@ -18,6 +18,10 @@ const ProjectService = {
         return knex('indicator')
         .insert(indicators, ["*"])
     },
+    createLifeChange(knex, lifeChanges) {
+        return knex('life_change')
+        .insert(lifeChanges, ["*"])
+    },
     createBeneficiaries(knex, newBeneficiaries) {
         return knex('beneficiary')
         .insert(newBeneficiaries, ["*"])
@@ -25,6 +29,24 @@ const ProjectService = {
     createDemographics(knex, newDemographics) {
         return knex('demographic')
         .insert(newDemographics, ["*"])
+    },
+    getBeneficiaries(db, projectId) {
+        return db
+        .select('beneficiary_id', 'name')
+        .from('beneficiary')
+        .where('project_id', projectId)
+    },
+    getDemographics(db, beneficiaryId) {
+        return db
+        .select('demographic_id', 'beneficiary_id', 'name', 'operator', 'value')
+        .from('demographic')
+        .whereIn('beneficiary_id', beneficiaryId)
+    },
+    getLifeChange(db, beneficiaryId) {
+        return db
+        .select('life_change_id', 'beneficiary_id', 'description')
+        .from('life_change')
+        .whereIn('beneficiary_id', beneficiaryId)
     },
     createProjectUser(db, projectUserInfo) {
         return db   
@@ -67,13 +89,13 @@ const ProjectService = {
     },
     getImpacts(db, id) {
         return db
-        .select('description')
+        .select('id', 'description')
         .from('impact')
         .where('project_id', id)
     },
     getOutcomes(db, id) {
         return db
-        .select('description')
+        .select('id', 'description')
         .from('outcome')
         .where('project_id', id)
     },
