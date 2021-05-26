@@ -16,13 +16,8 @@ orgRouter
 
         //GET all organizations based on userId
     .get('/', jwtCheck, jsonBodyParser, (req, res, next) => {
-        const authHeader = req.headers['authorization']
-        const token = authHeader && authHeader.split(' ')[1]
-    
-        if (token == null) return res.status(401)
         
-        const decoded = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
-        const userId = decoded.sub
+        const userId = req.user.sub
 
         OrgService.getOrgIdBasedOnUser(
             req.app.get('db'),
@@ -48,21 +43,20 @@ orgRouter
             })
     })
     .post('/create', jwtCheck, jsonBodyParser, getRoleId, (req, res, next) => {
-        const authHeader = req.headers['authorization']
-        const token = authHeader && authHeader.split(' ')[1]
-    
-        if (token == null) return res.status(401)
         
-        const decoded = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
-        const userId = decoded.sub
+        const userId = req.user.sub
         const roleId = req.roleId
         
-        const {name, url} = req.body
-
+        const {name, url, handle, description, region, sector } = req.body
+        console.log(req.body)
             //Sanitize     !!! We need to verify the url is a url !!!
         const newOrg = {
             name: xss(name), 
-            url: xss(url)
+            url: xss(url),
+            description: xss(description),
+            handle: xss(handle),
+            region: xss(region),
+            sector: xss(sector)
         }
             //make sure the fields are not empty
         for (const field of ['name', 'url'])

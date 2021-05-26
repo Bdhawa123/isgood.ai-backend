@@ -48,10 +48,14 @@ CREATE TABLE "org" (
     "org_id" TEXT NOT NULL DEFAULT concat('or-', generate_uid(6)) UNIQUE,
     "created_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "name" TEXT NOT NULL,
-    "url" TEXT NOT NULL,
+    "url" TEXT,
     "plan" TEXT NOT NULL,
     "plan_status" TEXT NOT NULL,
-
+    "description" TEXT,
+    "handle" TEXT,
+    "region" TEXT,
+    "sector" TEXT,
+    
     PRIMARY KEY ("id")
 );
 

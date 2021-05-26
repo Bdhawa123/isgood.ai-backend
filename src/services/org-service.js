@@ -22,7 +22,7 @@ const OrgService = {
     },
     getOrgs(db, orgId) {
         return db
-        .select('*')
+        .select('org_id', 'name', 'url', 'description', 'handle', 'region', 'sector' )
         .from('org')
         .whereIn('id', orgId)
     },
