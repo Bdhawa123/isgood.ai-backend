@@ -8,7 +8,7 @@ const { NODE_ENV } = require('./config')
 const usersRouter = require('./routes/users-router')
 const authRouter = require('./routes/auth-router')
 const orgRouter = require('./routes/org-router')
-const projectRouter = require('./routes/project-router')
+const projectRouter = require('./routes/project/index')
 
 
 const app = express()
@@ -23,7 +23,10 @@ app.use(cors())
 
 
 //------------------Router-----------------------//
+// const routes = express.Router()
 
+// require('./routes/project').default(routes)
+// app.use('/api', routes)
 
 app.use('/api/auth', authRouter)
 app.use('/api/users', usersRouter)
