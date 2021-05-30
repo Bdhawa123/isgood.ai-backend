@@ -2,7 +2,7 @@ const xss = require('xss')
 const axios = require('axios')
 const ProjectService = require('../../services/project-service')
 const OrgService = require('../../services/org-service')
-const RoleService = require('../../services/role-service')
+const {RoleService} = require('../../services/role-service')
 
 function postProject (req, res, next) {
     const userId = req.user.sub
@@ -81,7 +81,7 @@ function postProject (req, res, next) {
             let newImpacts = []
             projectImpacts.map(impact => {
                 newImpacts.push({
-                    "project_id": project.id, 
+                    "project_id": project.project_id, 
                     "description": xss(impact)
                 })
             })
@@ -95,7 +95,7 @@ function postProject (req, res, next) {
                     let newOutcomes = []
                     outcomesDesired.map(outcome => {
                         newOutcomes.push({
-                            "project_id": project.id, 
+                            "project_id": project.project_id, 
                             "description": xss(outcome)
                         })
                     })

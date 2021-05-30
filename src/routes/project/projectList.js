@@ -19,6 +19,13 @@ function listProjects(req, res, next) {
                 projectIds
             )
                 .then(projects => {
+                    for(let i = 0; i < projects.length; i++) {
+                        for(let j = 0; j < projectUser.length; j++) {
+                            if(projects[i].project_id === projectUser[j].project_id) {
+                                projects[i].role = projectUser[j].name
+                            }
+                        }
+                    }
                     res.status(200)
                     .json(projects)
                 })

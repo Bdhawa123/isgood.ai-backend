@@ -6,12 +6,12 @@ function findProject(req, res, next) {
 
             ProjectService.getImpacts(
                 req.app.get('db'),
-                metaUserProjectInfo.id
+                metaUserProjectInfo.project_id
             )
                 .then(impacts => {
                     ProjectService.getOutcomes(
                         req.app.get('db'),
-                        metaUserProjectInfo.id
+                        metaUserProjectInfo.project_id
                     )
                         .then(outcomes => {
                             ProjectService.getById(
@@ -19,6 +19,7 @@ function findProject(req, res, next) {
                                 metaUserProjectInfo.project_id
                             )
                                 .then(project => {
+                                    project.role = req.role.name
                                     project.impacts = impacts
                                     project.outcomes = outcomes
                                     project.beneficiaries = req.beneficiaries

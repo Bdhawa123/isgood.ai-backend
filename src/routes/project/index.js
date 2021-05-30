@@ -2,6 +2,7 @@ const express = require('express')
 const projectRouter = express.Router()
 const jsonBodyParser = express.json()
 let jwtCheck = require('../../middleware/oAuth')
+const {checkProjectCreate, checkProjectRead, checkProjectUpdate} = require('../../middleware/checkRole')
 const {listProjects} = require('./projectList')
 const {getRoleId, orgExists, postProject} = require('./projectCreate')
 const {checkProjectExists, handleIndicatorsDesc, getBeneficiaries, findProject} = require('./projectFind')
@@ -14,18 +15,18 @@ projectRouter
     );
 projectRouter
     .post(
-        '/create', jwtCheck, jsonBodyParser, getRoleId, orgExists, 
+        '/create', jwtCheck, jsonBodyParser, orgExists, checkProjectCreate, getRoleId,  
         postProject
     )
 projectRouter
     .route('/:projectId')
     .all(jwtCheck)
     .get(
-        checkProjectExists, handleIndicatorsDesc, getBeneficiaries,
+        checkProjectExists, checkProjectRead, handleIndicatorsDesc, getBeneficiaries,
         findProject
     )
     .patch(
-        checkProjectExists, jsonBodyParser,
+        checkProjectExists, jsonBodyParser, checkProjectUpdate,
         updateProject
     )
 

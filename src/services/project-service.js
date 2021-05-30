@@ -59,6 +59,8 @@ const ProjectService = {
         return knex('project_user')
         .select('*')
         .where('user_id', userId)
+        .join('roles', 'roles.id', '=', 'project_user.role_id')
+        .select('project_user.project_id', 'project_user.status', 'roles.name')
     },
     getProjects(db, projectId) {
         return db
@@ -101,8 +103,32 @@ const ProjectService = {
     },
     updateProject(knex, projectId, newProjectsFields) {
         return knex('project')
-            .where({ projectId })
+            .where('project_id', projectId)
             .update(newProjectsFields)
+            .returning('*')
+            .then(rows => {
+                return rows[0]
+            })
+    },
+    updateImpacts(knex, projectId, impactId, newImpact) {
+        return knex('impact')
+            .where({
+                'id': impactId,
+                'project_id': projectId
+            })
+            .update(newImpact)
+            .returning('*')
+            .then(rows => {
+                return rows[0]
+            })
+    },
+    updateOutcomes(knex, projectId, outcomeId, newOutcome) {
+        return knex('outcome')
+            .where({
+                'id': outcomeId,
+                'project_id': projectId
+            })
+            .update(newOutcome)
             .returning('*')
             .then(rows => {
                 return rows[0]

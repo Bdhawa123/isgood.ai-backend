@@ -35,6 +35,7 @@ INSERT INTO "roles" (name)
 VALUES
 ('ADMIN'),
 ('ORGANIZATION_OWNER'),
+('ORGANIZATION_MANAGER'),
 ('PROJECT_OWNER'),
 ('PROJECT_MANAGER'),
 ('COLLABORATOR'),
@@ -159,19 +160,19 @@ CREATE TABLE "life_change" (
 CREATE TABLE "impact" (
     "id" SERIAL NOT NULL,
     "description" TEXT NOT NULL,
-    "project_id" INTEGER,
+    "project_id" TEXT,
 
     PRIMARY KEY ("id"),
-    FOREIGN KEY ("project_id") REFERENCES "project"("id") ON DELETE CASCADE
+    FOREIGN KEY ("project_id") REFERENCES "project"("project_id") ON DELETE CASCADE
 );
 
 CREATE TABLE "outcome" (
     "id" SERIAL NOT NULL,
     "description" TEXT NOT NULL,
-    "project_id" INTEGER NOT NULL,
+    "project_id" TEXT NOT NULL,
 
     PRIMARY KEY ("id"),
-    FOREIGN KEY ("project_id") REFERENCES "project"("id") ON DELETE CASCADE
+    FOREIGN KEY ("project_id") REFERENCES "project"("project_id") ON DELETE CASCADE
 );
 
 CREATE TABLE "indicator" (
