@@ -1,8 +1,9 @@
 const xss = require('xss')
-const axios = require('axios')
 const ProjectService = require('../../services/project-service')
 const OrgService = require('../../services/org-service')
-const RoleService = require('../../services/role-service')
+const {RoleService} = require('../../services/role-service')
+const ImpactService = require('../../services/impact-service')
+const OutcomeService = require('../../services/outcome-service')
 
 function postProject (req, res, next) {
     const userId = req.user.sub
@@ -57,20 +58,6 @@ function postProject (req, res, next) {
         newProject.geolocation = [xss(coordinates[0]), xss(coordinates[1])]
     }
 
-
-    // Sanitize impacts and outcomes before sending to gateway api
-    const impacts = projectImpacts.map(impact => xss(impact))
-    const outcomes = outcomesDesired.map(outcome => xss(outcome))
-
-
-        //reconstruct projectObject to send to Gateway api
-    let theObj = {
-        name: xss(name), 
-        description: xss(description),
-        project_impacts: impacts,
-        outcomes_desired: outcomes
-    }
-
         //create project table
     ProjectService.createProject (
     req.app.get('db'),
@@ -81,12 +68,12 @@ function postProject (req, res, next) {
             let newImpacts = []
             projectImpacts.map(impact => {
                 newImpacts.push({
-                    "project_id": project.id, 
+                    "project_id": project.project_id, 
                     "description": xss(impact)
                 })
             })
 
-            ProjectService.createImpact(
+            ImpactService.createImpact(
                 req.app.get('db'),
                 newImpacts
             )
@@ -95,11 +82,11 @@ function postProject (req, res, next) {
                     let newOutcomes = []
                     outcomesDesired.map(outcome => {
                         newOutcomes.push({
-                            "project_id": project.id, 
+                            "project_id": project.project_id, 
                             "description": xss(outcome)
                         })
                     })
-                    ProjectService.createOutcome(
+                    OutcomeService.createOutcome(
                         req.app.get('db'),
                         newOutcomes
                     )
@@ -117,10 +104,7 @@ function postProject (req, res, next) {
                                     if(beneficiaries && beneficiaries.length > 0) {
                                         setBeneficiaries(project.project_id, beneficiaries)
                                     }
-                                        // Need to change projectId to assetId? 
-                                    theObj.projectId = project.project_id
-                                        //send project to DS to get the indicators to the project
-                                    getIndicators(theObj)
+                                      res.status(201).json(project)
                                 })
                         })
                 })
@@ -182,35 +166,6 @@ function postProject (req, res, next) {
                                 })
                         })
                 }).catch(next)    
-        }
-
-        function getIndicators(theObj) {
-                //Will be a post request but the endpoint is not functioning yet. Using jsonServer for now to create dummy data
-            axios.post('https://9deylj26rg.execute-api.us-east-2.amazonaws.com/test', theObj) 
-                .then(indicators => {
-                    console.log(indicators.data.indicators)
-                    let concatIndicators = []
-                    indicators.data.indicators.map(indicator => {
-                        concatIndicators.push({
-                            "project_id": indicators.data.projectId, 
-                            "indicator_id": indicator.indicatorId,
-                            "aligned_strength": indicator.alignedStrength
-                        })
-                    })
-                    ProjectService.createIndicators(
-                        req.app.get('db'),
-                        concatIndicators
-                    )
-                    .then(setIndicators => {
-                        res.status(201)
-                        .end()
-                    })
-                }).catch(error => {
-                        res.status(201).send({
-                            error: {message: "There has been an issue fetching projects indicators"}
-                        })
-                    next()
-                })
         }
 }
 

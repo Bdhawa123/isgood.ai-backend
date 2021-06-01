@@ -3,16 +3,8 @@ const ProjectService = {
         return db
         .insert(newProject)
         .into('project')
-        .returning('*')
+        .returning(['project_id', 'org_id'])
         .then(([project]) => project)
-    },
-    createImpact(knex, newImpacts) {
-        return knex('impact')
-        .insert(newImpacts, ["*"])
-    },
-    createOutcome(knex, newOutcomes) {
-        return knex('outcome')
-        .insert(newOutcomes, ["*"])
     },
     createIndicators(knex, indicators) {
         return knex('indicator')
@@ -59,6 +51,8 @@ const ProjectService = {
         return knex('project_user')
         .select('*')
         .where('user_id', userId)
+        .join('roles', 'roles.id', '=', 'project_user.role_id')
+        .select('project_user.project_id', 'project_user.status', 'roles.name')
     },
     getProjects(db, projectId) {
         return db
@@ -87,23 +81,11 @@ const ProjectService = {
         .from('indicator')
         .where({'project_id': projectId})
     },
-    getImpacts(db, id) {
-        return db
-        .select('id', 'description')
-        .from('impact')
-        .where('project_id', id)
-    },
-    getOutcomes(db, id) {
-        return db
-        .select('id', 'description')
-        .from('outcome')
-        .where('project_id', id)
-    },
     updateProject(knex, projectId, newProjectsFields) {
         return knex('project')
-            .where({ projectId })
+            .where('project_id', projectId)
             .update(newProjectsFields)
-            .returning('*')
+            .returning(['project_id', 'name', 'description', 'geolocation', 'start_date', 'end_date', 'org_id'])
             .then(rows => {
                 return rows[0]
             })

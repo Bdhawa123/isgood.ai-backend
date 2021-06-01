@@ -50,13 +50,11 @@ usersRouter
           })
           .catch((err) => {
             // error handling here needs to be looked at in the future
-            console.log(err.response.data);
             res.status(err.response.data.statusCode).json(err.response.data);
           });
       })
       .catch((err) => {
         // error handling here needs to be looked at in the future
-        console.log(err.response);
         res.status(err.response.status).json(err.response.data);
       });
   });

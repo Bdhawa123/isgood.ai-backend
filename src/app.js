@@ -8,6 +8,9 @@ const { NODE_ENV } = require('./config')
 const usersRouter = require('./routes/users-router')
 const orgRouter = require('./routes/org/index')
 const projectRouter = require('./routes/project/index')
+const impactRouter = require('./routes/impact/index')
+const outcomeRouter = require('./routes/outcome/index')
+const indicatorRouter = require('./routes/indicator/index')
 
 
 const app = express()
@@ -26,6 +29,9 @@ app.use(cors())
 app.use('/api/users', usersRouter)
 app.use('/api/org', orgRouter)
 app.use('/api/project', projectRouter)
+app.use('/api/impact', impactRouter)
+app.use('/api/outcome', outcomeRouter)
+app.use('/api/indicator', indicatorRouter)
 
 
 app.use(function errorHandler(error, req, res, next) {
@@ -33,10 +39,15 @@ app.use(function errorHandler(error, req, res, next) {
     if (NODE_ENV === 'production') {
         response = {error: {message: 'server error'}}
     } else {
-        console.error(error)
         response = {message: error.message, error}
     }
-    res.status(500).json(response)
+
+    if(error.status === 401) {
+        res.status(401).json(response)
+    } else {
+        res.status(500).json(response)
+    }
+    
 
 })
 
