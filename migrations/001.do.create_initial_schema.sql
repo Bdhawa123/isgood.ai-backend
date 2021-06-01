@@ -35,6 +35,7 @@ INSERT INTO "roles" (name)
 VALUES
 ('ADMIN'),
 ('ORGANIZATION_OWNER'),
+('ORGANIZATION_MANAGER'),
 ('PROJECT_OWNER'),
 ('PROJECT_MANAGER'),
 ('COLLABORATOR'),
@@ -81,7 +82,7 @@ CREATE TABLE "project" (
     "created_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "name" TEXT NOT NULL,
     "description" TEXT NOT NULL,
-    "geolocation" TEXT,
+    "geolocation" TEXT ARRAY,
     "start_date" TIMESTAMPTZ,
     "end_date" TIMESTAMPTZ,
     "org_id" TEXT,
@@ -159,27 +160,28 @@ CREATE TABLE "life_change" (
 CREATE TABLE "impact" (
     "id" SERIAL NOT NULL,
     "description" TEXT NOT NULL,
-    "project_id" INTEGER,
+    "project_id" TEXT,
 
     PRIMARY KEY ("id"),
-    FOREIGN KEY ("project_id") REFERENCES "project"("id") ON DELETE CASCADE
+    FOREIGN KEY ("project_id") REFERENCES "project"("project_id") ON DELETE CASCADE
 );
 
 CREATE TABLE "outcome" (
     "id" SERIAL NOT NULL,
     "description" TEXT NOT NULL,
-    "project_id" INTEGER NOT NULL,
+    "project_id" TEXT NOT NULL,
 
     PRIMARY KEY ("id"),
-    FOREIGN KEY ("project_id") REFERENCES "project"("id") ON DELETE CASCADE
+    FOREIGN KEY ("project_id") REFERENCES "project"("project_id") ON DELETE CASCADE
 );
 
 CREATE TABLE "indicator" (
+    "id" TEXT NOT NULL DEFAULT concat('in-', generate_uid(6)) UNIQUE,
     "project_id" TEXT NOT NULL,
     "indicator_id" TEXT NOT NULL,
     "aligned_strength" TEXT NOT NULL,
 
-    PRIMARY KEY ("project_id" , "indicator_id"),
+    PRIMARY KEY ("id"),
     FOREIGN KEY ("project_id") REFERENCES "project"("project_id") ON DELETE CASCADE
 );
 

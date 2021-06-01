@@ -1,6 +1,6 @@
 const xss = require('xss')
 const OrgService = require('../../services/org-service')
-const RoleService = require('../../services/role-service')
+const {RoleService} = require('../../services/role-service')
 
 function postOrg(req, res, next) {
         

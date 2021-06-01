@@ -19,12 +19,15 @@ const OrgService = {
         return knex('org_user')
         .select('*')
         .where('user_id', userId)
+        .join('roles', 'roles.id', '=', 'org_user.role_id')
+        .select('org_user.org_id', 'org_user.status', 'roles.name')
     },
     getOrgs(db, orgId) {
         return db
-        .select('org_id', 'name', 'url', 'description', 'handle', 'region', 'sector' )
+        .select('*')
         .from('org')
-        .whereIn('id', orgId)
+        .whereIn('org_id', orgId)
+        
     },
     getByOrgId(knex, orgId) {
         return knex('org')

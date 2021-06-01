@@ -2,7 +2,7 @@ let jwt = require('express-jwt');
 let jwks = require('jwks-rsa');
 const jwtAuthz = require('express-jwt-authz');
 
-let jwtCheck = jwt({
+const  jwtCheck = jwt({
     secret: jwks.expressJwtSecret({
         cache: true,
         rateLimit: true,
