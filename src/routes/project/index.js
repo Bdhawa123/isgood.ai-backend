@@ -5,7 +5,7 @@ let jwtCheck = require('../../middleware/oAuth')
 const {checkProjectCreate, checkProjectRead, checkProjectUpdate} = require('../../middleware/checkRole')
 const {listProjects} = require('./projectList')
 const {getRoleId, orgExists, postProject} = require('./projectCreate')
-const {checkProjectExists, handleIndicatorsDesc, getBeneficiaries, findProject} = require('./projectFind')
+const {checkProjectExists, getBeneficiaries, findProject} = require('./projectFind')
 const {updateProject} = require('./projectUpdate')
 
 projectRouter
@@ -22,7 +22,7 @@ projectRouter
     .route('/:projectId')
     .all(jwtCheck)
     .get(
-        checkProjectExists, checkProjectRead, handleIndicatorsDesc, getBeneficiaries,
+        checkProjectExists, checkProjectRead, getBeneficiaries,
         findProject
     )
     .patch(

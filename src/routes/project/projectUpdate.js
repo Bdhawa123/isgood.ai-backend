@@ -1,69 +1,60 @@
-const express = require('express')
 const xss = require('xss')
-const axios = require('axios')
 const ProjectService = require('../../services/project-service')
-const RoleService = require('../../services/role-service')
 
  const updateProject = async (req, res, next) => {
-    const userId = req.user.sub
-    const {name, description, projectImpacts, outcomesDesired, startDate, endDate, coordinates } = req.body
+    const {name, description, startDate, endDate, coordinates } = req.body
+
+     //make sure the fields are not empty
+     for (const field of ['name', 'description', 'orgId'])
+     if (!req.body[field])
+         return res.status(400).json({
+             error: {message: `Missing '${field}' in request body`}
+         })
+
+    const projectToUpdate = {
+        name: xss(name),
+        description: xss(description)
+    }
+
+    // check if startDate and endDate are valid before saving to db
+    Date.prototype.isValid = function () {
+        // An invalid date object returns NaN for getTime() and NaN is the only
+        // object not strictly equal to itself.
+        return this.getTime() === this.getTime();
+    }; 
+    let sd = new Date(startDate);
+    let ed = new Date(endDate);
+    let checkStartDate = sd.isValid()
+    let checkEndDate = ed.isValid()
+    
+    if(startDate.length !== 0 && !checkStartDate) {
+        return res.status(400).json({
+            error: {message: `${startDate} is an invalid timestamp`}
+        })
+    } else if (startDate.length !== 0) {
+        projectToUpdate.start_date = startDate;
+    }
+    
+    if (endDate.length !== 0 && !checkEndDate) {
+        return res.status(400).json({
+            error: {message: `${endDate} is an invalid timestamp`}
+        })
+    } else if (endDate.length !== 0) {
+        projectToUpdate.end_date = endDate;
+    } 
+
+    //save geoLocation if exists
+    if(coordinates && coordinates.length !== 0) {
+        projectToUpdate.geolocation = [xss(coordinates[0]), xss(coordinates[1])]
+    }
 
     try{
-        const projectToUpdate = {
-            name,
-            description,
-            start_date: startDate,
-            end_date: endDate
-        }
-    
         const updatedProject = await ProjectService.updateProject(
             req.app.get('db'),
             req.params.projectId,
             projectToUpdate
         )
 
-        const impactPromises = []
-        for (let i = 0; i < projectImpacts.length; i++) {
-            if(!projectImpacts[i].description || projectImpacts[i].description.length === 0) {
-                return res.status(400).json({
-                    error: {message: `Impact description required`}
-                })
-            }
-            let newImpact = {
-                description: projectImpacts[i].description
-            }
-            impactPromises.push(ProjectService.updateImpacts(
-                req.app.get('db'),
-                req.params.projectId,
-                projectImpacts[i].id,
-                newImpact
-            ))    
-        }
-        const impacts = await Promise.all(impactPromises)
-        console.log(impacts)
-
-        const outcomePromises = []
-        for (let j = 0; j < outcomesDesired.length; j++) {
-            if(!outcomesDesired[j].description || outcomesDesired[j].description.length === 0) {
-                return res.status(400).json({
-                    error: {message: `Outcome description required`}
-                })
-            }
-            let newOutcome = {
-                description: outcomesDesired[j].description
-            }
-            outcomePromises.push(ProjectService.updateOutcomes(
-                req.app.get('db'),
-                req.params.projectId,
-                outcomesDesired[j].id,
-                newOutcome
-            )) 
-        }
-        const outcomes = await Promise.all(outcomePromises)
-
-
-        updatedProject.impacts = impacts
-        updatedProject.outcomes = outcomes
         res.status(200).json(updatedProject)
     } catch(err) {
         next(err)

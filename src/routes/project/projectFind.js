@@ -1,15 +1,16 @@
 const ProjectService = require('../../services/project-service')
-const RoleService = require('../../services/role-service')
+const OutcomeService = require('../../services/outcome-service')
+const ImpactService = require('../../services/impact-service')
 
 function findProject(req, res, next) {
     const {metaUserProjectInfo} = req
 
-            ProjectService.getImpacts(
+            ImpactService.getImpacts(
                 req.app.get('db'),
                 metaUserProjectInfo.project_id
             )
                 .then(impacts => {
-                    ProjectService.getOutcomes(
+                    OutcomeService.getOutcomes(
                         req.app.get('db'),
                         metaUserProjectInfo.project_id
                     )
@@ -23,7 +24,6 @@ function findProject(req, res, next) {
                                     project.impacts = impacts
                                     project.outcomes = outcomes
                                     project.beneficiaries = req.beneficiaries
-                                    project.indicators = req.indicators
                                     res.status(200).json(project)
                                 }) 
                         })
@@ -84,55 +84,6 @@ function getBeneficiaries(req, res, next) {
     
 }
 
-function handleIndicatorsDesc(req, res, next){
-    ProjectService.getIndicators(
-        req.app.get('db'),
-        req.params.projectId
-    )
-        .then(metaIndicatorInfo => {
-            if(metaIndicatorInfo.length === 0) {
-                req.indicators = 'there was a problem fetching project indicators'
-            } else {
-                let ids = metaIndicatorInfo.map(indicator => indicator.indicator_id)
-                let indicators = getIndicatorDesc(ids)
-                let completeIndicators = []
-                for(let i = 0; i < indicators.length; i++) {
-                    for(let j = 0; j < metaIndicatorInfo.length; j++) {
-                        if(indicators[i].id == metaIndicatorInfo[j].indicator_id) {
-                            completeIndicators.push({
-                                'indicator_id': metaIndicatorInfo[j].indicator_id,
-                                'description': indicators[i].description,
-                                'aligned_strength': metaIndicatorInfo[j].aligned_strength
-                            })
-                        }
-                    }
-                }
-                req.indicators = completeIndicators
-            }
-            
-        }).catch(next)
-    
-    next()
-
-    function getIndicatorDesc(ids) {
-        let indicators = [
-            {
-                id: 1,
-                description: "This is a indicator description"
-            },
-            {
-                id: 2,
-                description: "This is a indicator description"
-            },
-            {
-                id: 3,
-                description: "This is a indicator description"
-            }
-        ]
-        return indicators
-    }
-}
-
 function checkProjectExists(req, res, next) {
     const projectId = req.params.projectId
     const userId = req.user.sub
@@ -158,6 +109,5 @@ function checkProjectExists(req, res, next) {
 module.exports = {
     findProject,
     getBeneficiaries,
-    handleIndicatorsDesc,
     checkProjectExists
 }

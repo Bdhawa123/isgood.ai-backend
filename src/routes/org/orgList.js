@@ -12,7 +12,6 @@ function listOrgs(req, res, next) {
         userId
     )
         .then(orgUser => {
-            console.log(orgUser)
             if(!orgUser) {
                 return res.status(200).json({
                     message: `No Organizations` 

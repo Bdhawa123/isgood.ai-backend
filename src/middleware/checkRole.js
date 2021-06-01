@@ -16,7 +16,6 @@ function checkProjectCreate(req, res, next) {
                     error: {message: 'Unauthorized Request'}
                 })
             }
-            console.log(roles)
             next()
         })
         .catch(next)
@@ -32,7 +31,6 @@ function checkProjectRead(req, res, next) {
         userId
     )
         .then(role => {
-            console.log(role)
             req.role = role
             next()
         })

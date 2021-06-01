@@ -22,6 +22,11 @@ Complete the following steps to get started:
    AUTH0_DOMAIN=""
    CLIENT_ID_MANAGEMENT=""
    CLIENT_SECRET_MANAGEMENT=""
+   IS_GOOD_USERNAME=""
+   IS_GOOD_PASSWORD=""
+   GATEWAY_AUTH_DOMAIN=""
+   GATEWAY_GET_INDICATORS=""
+   GATEWAY_INDICATOR_DETAILS=""
 6. Create a database with DATABASENAME and your USERNAME
 7. Run `npm run migrate` to create tables
 8. Run `npm run dev` to start nodemon
@@ -40,14 +45,6 @@ Run the tests `npm test`
 
 Protected Endpoints need an Authorization header containing the Bearer token
 
-### Register
-
-api/users/register - (body must contain firstName, lastName, email, password)
-
-### Login
-
-api/auth/login - (body must include email and password)
-
 ### Organization
 
 POST
@@ -64,4 +61,31 @@ api/project/create - (body must contain orgId, name, description, projectImpacts
 GET
 api/project - (returns \* projects based on user)
 
-api/project/projectId - (returns project info and indicators for the project)
+api/project/:projectId - (returns project info and indicators for the project)
+
+PATCH
+api/project/:projectId - (body must contain {"name": "string", "orgId": "string", "description": "string" } Optional: {"coordinates": [ array ], "startDate": "TIMESTAMP" "endDate": "TIMESTAMP" } )
+
+### Impacts
+
+PATCH
+api/impact/update/:projectId - (body must contain orgId and projectImpacts: [{id: "number", description: "String"}] if added new impact then "id" key value pair must be left out)
+
+DELETE
+api/impact/delete/:projectId - (body must contain {"orgId": "string","deleteImpactIds": [ numbers ] })
+
+### Outcomes
+
+PATCH
+api/outcome/update/:projectId = (body must contain orgId and outcomesDesired: [{id: "number", description: "String"}] if added new impact then "id" key value pair must be left out)
+
+DELETE
+api/outcome/delete/:projectId - (body must contain {"orgId": "string","deleteOutcomeIds": [ numbers ] })
+
+### Indicators
+
+POST
+api/indicator/:projectId - (this endpoint fetches indicators to assign to a project. Body requires: { "orgId": "or-qxaoKx" } )
+
+POST 
+api/indicator/details/:projectId - (this endpoint fetches the details for the indicators passed in the body. Body requires: { "orgId": "or-qxaoKx" })
