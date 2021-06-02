@@ -11,7 +11,7 @@ const projectRouter = require('./routes/project/index')
 const impactRouter = require('./routes/impact/index')
 const outcomeRouter = require('./routes/outcome/index')
 const indicatorRouter = require('./routes/indicator/index')
-const imageRouter = require('./routes/images-router')
+const imagesRouter = require('./routes/images-router')
 
 const app = express()
 
