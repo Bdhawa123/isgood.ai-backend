@@ -20,8 +20,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql VOLATILE;
 
--- CreateEnum
--- CREATE TYPE "Role" AS ENUM ('ADMIN', 'ORGANIZATION_OWNER', 'PROJECT_OWNER', 'PROJECT_MANAGER', 'COLLABORATOR', 'GUEST_VIEW', 'USER');
+
 
 -- CreateTable 
 CREATE TABLE "roles" (
@@ -45,7 +44,6 @@ VALUES
 
 -- CreateTable
 CREATE TABLE "org" (
-    "id" SERIAL NOT NULL,
     "org_id" TEXT NOT NULL DEFAULT concat('or-', generate_uid(6)) UNIQUE,
     "created_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "name" TEXT NOT NULL,
@@ -57,27 +55,11 @@ CREATE TABLE "org" (
     "region" TEXT,
     "sector" TEXT,
     
-    PRIMARY KEY ("id")
+    PRIMARY KEY ("org_id")
 );
 
 -- CreateTable
--- CREATE TABLE "user" (
---     "userId" uuid DEFAULT uuid_generate_v4(),
---     "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
---     "firstName" VARCHAR(255) NOT NULL,
---     "lastName" VARCHAR(255) NOT NULL,
---     "email" VARCHAR(255) NOT NULL,
---     "password" VARCHAR(255) NOT NULL,
---     "status" BOOLEAN NOT NULL DEFAULT true,
---     "lastOrgId" INTEGER,
-
---     PRIMARY KEY ("userId"),
---     FOREIGN KEY ("lastOrgId") REFERENCES "org"("orgId") 
--- );
-
--- CreateTable
 CREATE TABLE "project" (
-    "id" SERIAL NOT NULL,
     "project_id" TEXT NOT NULL DEFAULT concat('pr-', generate_uid(6)) UNIQUE,
     "created_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "name" TEXT NOT NULL,
@@ -86,14 +68,15 @@ CREATE TABLE "project" (
     "start_date" TIMESTAMPTZ,
     "end_date" TIMESTAMPTZ,
     "org_id" TEXT,
+    "indicator_current" BOOLEAN NOT NULL DEFAULT false,
 
-    PRIMARY KEY ("id"),
+    PRIMARY KEY ("project_id"),
     FOREIGN KEY ("org_id") REFERENCES "org"("org_id") ON DELETE CASCADE
 );
 
 -- CreateTable
 CREATE TABLE "org_user" (
-    "id" SERIAL NOT NULL,
+    "id" TEXT NOT NULL DEFAULT concat('ou-', generate_uid(6)) UNIQUE,
     "org_id" TEXT NOT NULL,
     "user_id" TEXT NOT NULL,
     "role_id" INTEGER NOT NULL,
@@ -108,7 +91,7 @@ CREATE TABLE "org_user" (
 
 -- CreateTable
 CREATE TABLE "project_user" (
-    "id" SERIAL NOT NULL,
+    "id" TEXT NOT NULL DEFAULT concat('pu-', generate_uid(6)) UNIQUE,
     "project_id" TEXT NOT NULL,
     "user_id" TEXT NOT NULL,
     "role_id" INTEGER NOT NULL,
@@ -122,19 +105,17 @@ CREATE TABLE "project_user" (
 
 -- CreateTable
 CREATE TABLE "beneficiary" (
-    "id" SERIAL NOT NULL,
     "beneficiary_id" TEXT NOT NULL DEFAULT concat('bn-', generate_uid(6)) UNIQUE,
     "created_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "name" TEXT NOT NULL,
     "project_id" TEXT,
 
-    PRIMARY KEY ("id"),
+    PRIMARY KEY ("beneficiary_id"),
     FOREIGN KEY ("project_id") REFERENCES "project"("project_id") ON DELETE CASCADE
 );
 
 -- CreateTable
 CREATE TABLE "demographic" (
-    "id" SERIAL NOT NULL,
     "demographic_id" TEXT NOT NULL DEFAULT concat('dg-', generate_uid(6)) UNIQUE,
     "created_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "name" TEXT NOT NULL,
@@ -142,23 +123,22 @@ CREATE TABLE "demographic" (
     "value" TEXT NOT NULL,
     "beneficiary_id" TEXT,
 
-    PRIMARY KEY ("id"),
+    PRIMARY KEY ("demographic_id"),
     FOREIGN KEY ("beneficiary_id") REFERENCES "beneficiary"("beneficiary_id") ON DELETE CASCADE
 );
 
 -- CreateTable
 CREATE TABLE "life_change" (
-    "id" SERIAL NOT NULL,
     "life_change_id" TEXT NOT NULL DEFAULT concat('lc-', generate_uid(6)) UNIQUE,
     "beneficiary_id" TEXT NOT NULL,
     "description" TEXT NOT NULL,
 
-    PRIMARY KEY ("id"),
+    PRIMARY KEY ("life_change_id"),
     FOREIGN KEY ("beneficiary_id") REFERENCES "beneficiary"("beneficiary_id") ON DELETE CASCADE
 );
 
 CREATE TABLE "impact" (
-    "id" SERIAL NOT NULL,
+    "id" TEXT NOT NULL DEFAULT concat('ip-', generate_uid(6)) UNIQUE,
     "description" TEXT NOT NULL,
     "project_id" TEXT,
 
@@ -167,7 +147,7 @@ CREATE TABLE "impact" (
 );
 
 CREATE TABLE "outcome" (
-    "id" SERIAL NOT NULL,
+    "id" TEXT NOT NULL DEFAULT concat('oc-', generate_uid(6)) UNIQUE,
     "description" TEXT NOT NULL,
     "project_id" TEXT NOT NULL,
 
@@ -184,11 +164,3 @@ CREATE TABLE "indicator" (
     PRIMARY KEY ("id"),
     FOREIGN KEY ("project_id") REFERENCES "project"("project_id") ON DELETE CASCADE
 );
-
--- CreateIndex
--- CREATE UNIQUE INDEX "user.email_unique" ON "user"("email");
-
--- ALTER TABLE "user"
--- ADD COLUMN "updated_at" 
---     TIMESTAMP DEFAULT CURRENT_TIMESTAMP 
---     ON UPDATE CURRENT_TIMESTAMP;

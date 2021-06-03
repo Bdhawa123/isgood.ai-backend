@@ -3,7 +3,6 @@ const axios = require('axios')
 const config = require('../../config')
 function handleIndicatorsDesc(req, res, next){
     const authToken = res.authToken
-    console.log(authToken)
 
     IndicatorService.getIndicators(
         req.app.get('db'),
