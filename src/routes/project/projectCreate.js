@@ -32,26 +32,33 @@ function postProject (req, res, next) {
         // object not strictly equal to itself.
         return this.getTime() === this.getTime();
     }; 
-    let sd = new Date(startDate);
-    let ed = new Date(endDate);
-    let checkStartDate = sd.isValid()
-    let checkEndDate = ed.isValid()
-    
-    if(startDate.length !== 0 && !checkStartDate) {
-        return res.status(400).json({
-            error: {message: `${startDate} is an invalid timestamp`}
-        })
-    } else if (startDate.length !== 0) {
-        newProject.start_date = startDate;
+
+    if (startDate) {
+        let sd = new Date(startDate);
+        let checkStartDate = sd.isValid()
+        if(startDate.length !== 0 && !checkStartDate) {
+            return res.status(400).json({
+                error: {message: `${startDate} is an invalid timestamp`}
+            })
+        } else if (startDate.length !== 0) {
+            newProject.start_date = startDate;
+        }
+
+    }
+    if (endDate) {
+        let ed = new Date(endDate);
+        let checkEndDate = ed.isValid()
+
+        if (endDate.length !== 0 && !checkEndDate) {
+            return res.status(400).json({
+                error: {message: `${endDate} is an invalid timestamp`}
+            })
+        } else if (endDate.length !== 0) {
+            newProject.end_date = endDate;
+        } 
     }
     
-    if (endDate.length !== 0 && !checkEndDate) {
-        return res.status(400).json({
-            error: {message: `${endDate} is an invalid timestamp`}
-        })
-    } else if (endDate.length !== 0) {
-        newProject.end_date = endDate;
-    } 
+    
 
     //save geoLocation if exists
     if(coordinates && coordinates.length !== 0) {

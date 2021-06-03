@@ -5,11 +5,6 @@ let jwtCheck = require('../../middleware/oAuth')
 const {listOrgs} = require('./orgList')
 const {postOrg, getRoleId} = require('./orgCreate')
 
-const multer = require("multer");
-const upload = multer({ dest: "uploads/" });
-
-const uploadS3 = require("../../middleware/multerS3")
-
 
 orgRouter
     .get(
@@ -19,7 +14,7 @@ orgRouter
 
 orgRouter
     .post(
-        '/create', jwtCheck, uploadS3.any(), getRoleId, 
+        '/create', jwtCheck, jsonBodyParser, getRoleId, 
         postOrg, 
     )
 

@@ -1,25 +1,14 @@
 const xss = require('xss')
 const OrgService = require('../../services/org-service')
 const {RoleService} = require('../../services/role-service')
-const AWS_S3_Service = require('../../services/aws-s3-service')
-const fs = require("fs");
-const util = require("util");
-const unlinkFile = util.promisify(fs.unlink);
+
+
 
 function postOrg(req, res, next) {
 
-    // const organisationLogo = req.files[0]
-    console.log(req.files)
-
-    // AWS_S3_Service.uploadImage(organisationLogo.filename)
-    //     .then((res) => {
-    //     console.log(res);
-    //     unlinkFile(organisationLogo.path);
-    //   })
-    //   .catch((err) => {
-    //     console.log(err);
-    //   })
-
+    
+    console.log(req.body)
+        
     const userId = req.user.sub
     const roleId = req.roleId
     
