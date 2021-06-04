@@ -37,6 +37,42 @@ const AWS_S3_Service = {
 
     return s3.getObject(params).createReadStream();
   },
+
+  createOrgLogo(db, newLogo) {
+    return db
+    .insert(newLogo)
+    .into('org_logo')
+    .returning('id')
+    .then(([logoId]) => logoId)
+},
+
+checkOrgLogo(knex, id) {
+  return knex('org_logo')
+      .select('*')
+      .where({
+          'id': id
+      }).first()
+},
+
+updateOrgLogo(knex, id, newOrgLogo) {
+  return knex('org_logo')
+      .where({
+          'id': id
+      })
+      .update(newOrgLogo)
+      .returning('*')
+      .then(rows => {
+          return rows[0]
+      })
+},
+
+getOrgLogos(db, orgId) {
+  return db
+  .select('*')
+  .from('org_logo')
+  .whereIn('org_id', orgId)
+  
+},
 };
 
 module.exports = AWS_S3_Service;

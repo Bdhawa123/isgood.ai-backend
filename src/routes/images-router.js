@@ -11,10 +11,21 @@ imagesRouter.post(
   jwtCheck,
   uploadS3.any(),
   (req, res, next) => {
-    const files = req.filesS;
-    console.log(files);
+    const files = req.files;
+    console.log(files[0].key);
+
+    const logo = {
+      location: files[0].key
+    }
     
-    res.json(files);
+    AWS_S3_Service.createOrgLogo(
+      req.app.get('db'),
+      logo
+    )
+      .then(logoId => {
+        res.status(201).json(logoId)
+      })
+      .catch(next)
   }
 );
 

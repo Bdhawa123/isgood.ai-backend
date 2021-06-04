@@ -1,5 +1,6 @@
 const OrgService = require('../../services/org-service')
 const getOrgRole = require('../../services/role-service')
+const AWS_S3_Service = require('../../services/aws-s3-service')
     //first check user for lastOrId if null then check orgUser table for orgs and return the orgs and user goes to global dash???
 
     //GET all organizations based on userId
@@ -31,9 +32,23 @@ function listOrgs(req, res, next) {
                             }
                         }
                     }
+                    AWS_S3_Service.getOrgLogos(
+                        req.app.get('db'),
+                        orgIds
+                    )
+                        .then(orgLogos => {
+                            for(let i = 0; i < orgs.length; i++) {
+                                for(let j = 0; j < orgLogos.length; j++) {
+                                    if(orgs[i].org_id === orgLogos[j].org_id) {
+                                        orgs[i].logoLocation = orgLogos[j].location
+                                    }
+                                }
+                            }
+                            res.status(200)
+                            .json(orgs)
+                        })
                     
-                    res.status(200)
-                    .json(orgs)
+                  
                 })
                 .catch(next)
 

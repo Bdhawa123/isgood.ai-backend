@@ -1,6 +1,7 @@
 const xss = require('xss')
 const OrgService = require('../../services/org-service')
 const {RoleService} = require('../../services/role-service')
+const AWS_S3_Service = require('../../services/aws-s3-service')
 
 
 
@@ -12,7 +13,7 @@ function postOrg(req, res, next) {
     const userId = req.user.sub
     const roleId = req.roleId
     
-    const {name, url, handle, description, region, sector } = req.body
+    const {name, url, handle, description, region, sector, logoId } = req.body
         //Sanitize     !!! We need to verify the url is a url !!!
     const newOrg = {
         name: xss(name), 
@@ -51,8 +52,36 @@ function postOrg(req, res, next) {
             )
                     //Update User so we know the last org they were logged into
                 .then(orgUser => {
-                    res.status(201)
-                    .json(org)
+                    if(!logoId) {
+                        return res.status(201)
+                        .json(org)
+                    }
+
+                    AWS_S3_Service.checkOrgLogo(
+                        req.app.get('db'),
+                        logoId
+                    )
+                        .then(orgLogo => {
+                            if(!orgLogo) {
+                                return res.status(201).json({
+                                    org,
+                                    error: {message: `No logo with id: ${logoId}`} 
+                                })
+                            }
+                            const newOrgLogo = {
+                                org_id: org.org_id
+                            }
+                            AWS_S3_Service.updateOrgLogo(
+                                req.app.get('db'),
+                                logoId,
+                                newOrgLogo
+                            )
+                                .then(updatedOrgLogo => {
+                                    res.status(201)
+                                    .json({org, updatedOrgLogo})
+                                })
+                        })
+                   
                 })  
                 // Should we write some custom error handlers? https://expressjs.com/en/guide/error-handling.html
                 .catch(next)

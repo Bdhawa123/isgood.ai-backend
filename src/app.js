@@ -41,6 +41,7 @@ app.use(function errorHandler(error, req, res, next) {
         response = {error: {message: 'server error'}}
     } else {
         response = {message: error.message, error}
+        console.log(response)
     }
 
     if(error.status === 401) {
