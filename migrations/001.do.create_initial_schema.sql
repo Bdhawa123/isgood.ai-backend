@@ -42,6 +42,8 @@ VALUES
 ('USER');
 
 
+
+
 -- CreateTable
 CREATE TABLE "org" (
     "org_id" TEXT NOT NULL DEFAULT concat('or-', generate_uid(6)) UNIQUE,
@@ -58,6 +60,18 @@ CREATE TABLE "org" (
     PRIMARY KEY ("org_id")
 );
 
+
+-- CreateTable
+CREATE TABLE "org_logo" (
+    "id" TEXT NOT NULL DEFAULT concat('ol-', generate_uid(6)) UNIQUE,
+    "location" TEXT,
+    "org_id" TEXT,
+
+    PRIMARY KEY ("id"),
+    FOREIGN KEY ("org_id") REFERENCES "org"("org_id") ON DELETE CASCADE
+);
+
+
 -- CreateTable
 CREATE TABLE "project" (
     "project_id" TEXT NOT NULL DEFAULT concat('pr-', generate_uid(6)) UNIQUE,
@@ -72,6 +86,17 @@ CREATE TABLE "project" (
 
     PRIMARY KEY ("project_id"),
     FOREIGN KEY ("org_id") REFERENCES "org"("org_id") ON DELETE CASCADE
+);
+
+
+-- CreateTable
+CREATE TABLE "project_logo" (
+    "id" TEXT NOT NULL DEFAULT concat('pl-', generate_uid(6)) UNIQUE,
+    "location" TEXT,
+    "project_id" TEXT,
+    
+    PRIMARY KEY ("id"),
+    FOREIGN KEY ("project_id") REFERENCES "project"("project_id") ON DELETE CASCADE
 );
 
 -- CreateTable

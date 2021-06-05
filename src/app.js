@@ -11,7 +11,7 @@ const projectRouter = require('./routes/project/index')
 const impactRouter = require('./routes/impact/index')
 const outcomeRouter = require('./routes/outcome/index')
 const indicatorRouter = require('./routes/indicator/index')
-
+const imagesRouter = require('./routes/images/index')
 
 const app = express()
 
@@ -32,6 +32,7 @@ app.use('/api/project', projectRouter)
 app.use('/api/impact', impactRouter)
 app.use('/api/outcome', outcomeRouter)
 app.use('/api/indicator', indicatorRouter)
+app.use('/api/images', imagesRouter)
 
 
 app.use(function errorHandler(error, req, res, next) {
@@ -40,6 +41,7 @@ app.use(function errorHandler(error, req, res, next) {
         response = {error: {message: 'server error'}}
     } else {
         response = {message: error.message, error}
+        console.log(response)
     }
 
     if(error.status === 401) {

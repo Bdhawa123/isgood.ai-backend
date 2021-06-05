@@ -5,6 +5,7 @@ let jwtCheck = require('../../middleware/oAuth')
 const {listOrgs} = require('./orgList')
 const {postOrg, getRoleId} = require('./orgCreate')
 
+
 orgRouter
     .get(
         '/', jwtCheck,
@@ -13,8 +14,8 @@ orgRouter
 
 orgRouter
     .post(
-        '/create', jwtCheck, jsonBodyParser, getRoleId,
-        postOrg
+        '/create', jwtCheck, jsonBodyParser, getRoleId, 
+        postOrg, 
     )
 
 

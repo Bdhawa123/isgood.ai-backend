@@ -1,6 +1,7 @@
 const ProjectService = require('../../services/project-service')
 const OutcomeService = require('../../services/outcome-service')
 const ImpactService = require('../../services/impact-service')
+const AWS_S3_Service = require("../../services/aws-s3-service");
 
 function findProject(req, res, next) {
     const {metaUserProjectInfo} = req
@@ -24,6 +25,7 @@ function findProject(req, res, next) {
                                     project.impacts = impacts
                                     project.outcomes = outcomes
                                     project.beneficiaries = req.beneficiaries
+                                    project.logo_location = req.logo_location
                                     res.status(200).json(project)
                                 }) 
                         })
@@ -106,8 +108,27 @@ function checkProjectExists(req, res, next) {
 
 }
 
+function getProjectLogo(req, res, next) {
+    const projectId = req.params.projectId
+
+    AWS_S3_Service.getByProjectId(
+        req.app.get('db'),
+        projectId
+    )
+        .then(projectLogo => {
+            if(!projectLogo) {
+                next()
+            }
+
+            req.logo_location = projectLogo.location
+            next()
+        })
+        .catch(next)
+}
+
 module.exports = {
     findProject,
     getBeneficiaries,
-    checkProjectExists
+    checkProjectExists,
+    getProjectLogo
 }
