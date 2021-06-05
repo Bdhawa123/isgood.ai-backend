@@ -6,9 +6,6 @@ const AWS_S3_Service = require('../../services/aws-s3-service')
 
 
 function postOrg(req, res, next) {
-
-    
-    console.log(req.body)
         
     const userId = req.user.sub
     const roleId = req.roleId

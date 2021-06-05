@@ -4,13 +4,14 @@ const OrgService = require('../../services/org-service')
 const {RoleService} = require('../../services/role-service')
 const ImpactService = require('../../services/impact-service')
 const OutcomeService = require('../../services/outcome-service')
+const AWS_S3_Service = require("../../services/aws-s3-service");
 
 function postProject (req, res, next) {
     const userId = req.user.sub
     const roleId = req.roleId
     
         //deconstruct req.body
-    const {name, description, projectImpacts, outcomesDesired, beneficiaries, orgId, startDate, endDate, coordinates } = req.body
+    const {name, description, projectImpacts, outcomesDesired, beneficiaries, orgId, startDate, endDate, coordinates, logoId } = req.body
 
     //make sure the fields are not empty
     for (const field of ['name', 'description', 'projectImpacts', 'outcomesDesired', 'orgId'])
@@ -111,7 +112,36 @@ function postProject (req, res, next) {
                                     if(beneficiaries && beneficiaries.length > 0) {
                                         setBeneficiaries(project.project_id, beneficiaries)
                                     }
-                                      res.status(201).json(project)
+
+                                    if(!logoId) {
+                                        return res.status(201)
+                                        .json(project)
+                                    }
+                
+                                    AWS_S3_Service.checkProjectLogo(
+                                        req.app.get('db'),
+                                        logoId
+                                    )
+                                        .then(projectLogo => {
+                                            if(!projectLogo) {
+                                                return res.status(201).json({
+                                                    project,
+                                                    error: {message: `No logo with id: ${logoId}`} 
+                                                })
+                                            }
+                                            const newProjectLogo = {
+                                                project_id: project.project_id
+                                            }
+                                            AWS_S3_Service.updateProjectLogo(
+                                                req.app.get('db'),
+                                                logoId,
+                                                newProjectLogo
+                                            )
+                                                .then(updatedProjectLogo => {
+                                                    res.status(201)
+                                                    .json({project, updatedProjectLogo})
+                                                })
+                                        })
                                 })
                         })
                 })
@@ -169,7 +199,7 @@ function postProject (req, res, next) {
                                 newDemographics
                             )
                                 .then(demographics => {
-                                    next
+                                    next()
                                 })
                         })
                 }).catch(next)    

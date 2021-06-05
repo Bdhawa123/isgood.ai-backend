@@ -40,7 +40,7 @@ function listOrgs(req, res, next) {
                             for(let i = 0; i < orgs.length; i++) {
                                 for(let j = 0; j < orgLogos.length; j++) {
                                     if(orgs[i].org_id === orgLogos[j].org_id) {
-                                        orgs[i].logoLocation = orgLogos[j].location
+                                        orgs[i].logo_location = orgLogos[j].location
                                     }
                                 }
                             }

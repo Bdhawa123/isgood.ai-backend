@@ -73,6 +73,50 @@ getOrgLogos(db, orgId) {
   .whereIn('org_id', orgId)
   
 },
+
+createProjectLogo(db, newLogo) {
+  return db
+  .insert(newLogo)
+  .into('project_logo')
+  .returning('id')
+  .then(([logoId]) => logoId)
+},
+
+checkProjectLogo(knex, id) {
+  return knex('project_logo')
+      .select('*')
+      .where({
+          'id': id
+      }).first()
+},
+
+updateProjectLogo(knex, id, newProjectLogo) {
+  return knex('project_logo')
+      .where({
+          'id': id
+      })
+      .update(newProjectLogo)
+      .returning('*')
+      .then(rows => {
+          return rows[0]
+      })
+},
+
+getProjectLogos(db, projectId) {
+  return db
+  .select('*')
+  .from('project_logo')
+  .whereIn('project_id', projectId)
+  
+},
+
+getByProjectId(knex, project_id) {
+  return knex('project_logo')
+      .select('location')
+      .where({
+      'project_id': project_id
+  }).first()
+},
 };
 
 module.exports = AWS_S3_Service;
