@@ -40,83 +40,78 @@ const AWS_S3_Service = {
 
   createOrgLogo(db, newLogo) {
     return db
-    .insert(newLogo)
-    .into('org_logo')
-    .returning('id')
-    .then(([logoId]) => logoId)
-},
+      .insert(newLogo)
+      .into("org_logo")
+      .returning("id")
+      .then(([logoId]) => logoId);
+  },
 
-checkOrgLogo(knex, id) {
-  return knex('org_logo')
-      .select('*')
+  checkOrgLogo(knex, id) {
+    return knex("org_logo")
+      .select("*")
       .where({
-          'id': id
-      }).first()
-},
+        id: id,
+      })
+      .first();
+  },
 
-updateOrgLogo(knex, id, newOrgLogo) {
-  return knex('org_logo')
+  updateOrgLogo(knex, id, newOrgLogo) {
+    return knex("org_logo")
       .where({
-          'id': id
+        id: id,
       })
       .update(newOrgLogo)
-      .returning('*')
-      .then(rows => {
-          return rows[0]
+      .returning("*")
+      .then((rows) => {
+        return rows[0];
+      });
+  },
+
+  getOrgLogos(db, orgId) {
+    return db.select("*").from("org_logo").whereIn("org_id", orgId);
+  },
+
+  createProjectLogo(db, newLogo) {
+    return db
+      .insert(newLogo)
+      .into("project_logo")
+      .returning("id")
+      .then(([logoId]) => logoId);
+  },
+
+  checkProjectLogo(knex, id) {
+    return knex("project_logo")
+      .select("*")
+      .where({
+        id: id,
       })
-},
+      .first();
+  },
 
-getOrgLogos(db, orgId) {
-  return db
-  .select('*')
-  .from('org_logo')
-  .whereIn('org_id', orgId)
-  
-},
-
-createProjectLogo(db, newLogo) {
-  return db
-  .insert(newLogo)
-  .into('project_logo')
-  .returning('id')
-  .then(([logoId]) => logoId)
-},
-
-checkProjectLogo(knex, id) {
-  return knex('project_logo')
-      .select('*')
+  updateProjectLogo(knex, id, newProjectLogo) {
+    return knex("project_logo")
       .where({
-          'id': id
-      }).first()
-},
-
-updateProjectLogo(knex, id, newProjectLogo) {
-  return knex('project_logo')
-      .where({
-          'id': id
+        id: id,
       })
       .update(newProjectLogo)
-      .returning('*')
-      .then(rows => {
-          return rows[0]
-      })
-},
+      .returning("*")
+      .then((rows) => {
+        return rows[0];
+      });
+  },
 
-getProjectLogos(db, projectId) {
-  return db
-  .select('*')
-  .from('project_logo')
-  .whereIn('project_id', projectId)
-  
-},
+  getProjectLogos(db, projectId) {
+    return db.select("*").from("project_logo").whereIn("project_id", projectId);
+  },
 
-getByProjectId(knex, project_id) {
-  return knex('project_logo')
-      .select('location')
+  getByProjectId(knex, project_id) {
+    return knex("project_logo")
+      .select("location")
       .where({
-      'project_id': project_id
-  }).first()
-},
+        project_id: project_id,
+      })
+      .first();
+  },
 };
 
 module.exports = AWS_S3_Service;
