@@ -1,5 +1,6 @@
-const ImpactService = require("../../services/impact-service");
 const xss = require("xss");
+const ImpactService = require("../../services/impact-service");
+
 const updateImpact = async (req, res, next) => {
   const { projectImpacts } = req.body;
 
@@ -15,7 +16,7 @@ const updateImpact = async (req, res, next) => {
           error: { message: `Impact description required` },
         });
       }
-      let newImpact = {
+      const newImpact = {
         description: xss(projectImpacts[i].description),
         project_id: req.params.projectId,
       };
@@ -34,13 +35,10 @@ const updateImpact = async (req, res, next) => {
       }
     }
     if (newImpacts.length > 0) {
-      const impactsAdded = await ImpactService.createImpact(
-        req.app.get("db"),
-        newImpacts
-      );
+      await ImpactService.createImpact(req.app.get("db"), newImpacts);
     }
 
-    const impacts = await Promise.all(updatedImpacts);
+    await Promise.all(updatedImpacts);
 
     const getImpacts = await ImpactService.getImpacts(
       req.app.get("db"),
