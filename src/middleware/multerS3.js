@@ -1,6 +1,6 @@
 require("dotenv").config();
 const multer = require("multer");
-const multerS3 = require('multer-s3')
+const multerS3 = require("multer-s3");
 const S3 = require("aws-sdk/clients/s3");
 
 const accessKey = process.env.S3_KEY;
@@ -20,14 +20,13 @@ const uploadS3 = multer({
     bucket: bucketName,
     // acl: 'public-read', //For public permissions later
     metadata: function (req, file, cb) {
-      cb(null, {fieldName: file.fieldname});
+      cb(null, { fieldName: file.fieldname });
     },
     key: function (req, file, cb) {
       // add unique Id ???
-      cb(null, Date.now().toString())
-    }
-  })
-})
+      cb(null, Date.now().toString());
+    },
+  }),
+});
 
-
-module.exports = uploadS3
+module.exports = uploadS3;

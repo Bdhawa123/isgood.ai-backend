@@ -9,11 +9,11 @@ const AuthService = {
     const data = {
       client_id: clientId,
       client_secret: clientSecret,
-      audience: domain + "/api/v2/",
+      audience: `${domain}/api/v2/`,
       grant_type: "client_credentials",
     };
 
-    return axios.post(domain + "/oauth/token", data);
+    return axios.post(`${domain}/oauth/token`, data);
   },
 };
 
