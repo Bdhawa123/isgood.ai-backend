@@ -18,7 +18,7 @@
     "ecmaVersion": 2018
   },
   "rules": {
-    "prettier/prettier": ["error"],
+    "prettier/prettier": "off",
     "consistent-return": "off",
     "no-unused-vars": "warn",
     "no-console": "warn",
