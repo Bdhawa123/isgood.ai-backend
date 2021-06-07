@@ -13,9 +13,7 @@ const ImpactService = {
       })
       .update(newImpact)
       .returning("*")
-      .then((rows) => {
-        return rows[0];
-      });
+      .then((rows) => rows[0]);
   },
   createImpact(knex, newImpacts) {
     return knex("impact").insert(newImpacts, ["*"]);

@@ -20,6 +20,15 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql VOLATILE;
 
+--Trigger updated Function
+CREATE OR REPLACE FUNCTION trigger_set_timestamp()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
 
 
 -- CreateTable 
@@ -48,6 +57,7 @@ VALUES
 CREATE TABLE "org" (
     "org_id" TEXT NOT NULL DEFAULT concat('or-', generate_uid(6)) UNIQUE,
     "created_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     "name" TEXT NOT NULL,
     "url" TEXT,
     "plan" TEXT NOT NULL,

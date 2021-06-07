@@ -62,9 +62,7 @@ const AWS_S3_Service = {
       })
       .update(newOrgLogo)
       .returning("*")
-      .then((rows) => {
-        return rows[0];
-      });
+      .then((rows) => rows[0]);
   },
 
   getOrgLogos(db, orgId) {
@@ -95,9 +93,7 @@ const AWS_S3_Service = {
       })
       .update(newProjectLogo)
       .returning("*")
-      .then((rows) => {
-        return rows[0];
-      });
+      .then((rows) => rows[0]);
   },
 
   getProjectLogos(db, projectId) {
