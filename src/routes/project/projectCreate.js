@@ -120,12 +120,17 @@ function postProject(req, res, next) {
                   setBeneficiaries(project.project_id, beneficiaries);
                 }
 
-                if (!logoId) {
-                  return res.status(201).json(project);
-                }
+                ProjectService.createIndicatorCurrent(req.app.get("db"), {
+                  project_id: project.project_id,
+                }).then((current) => {
+                  if (!logoId) {
+                    return res.status(201).json(project);
+                  }
 
-                AWS_S3_Service.checkProjectLogo(req.app.get("db"), logoId).then(
-                  (projectLogo) => {
+                  AWS_S3_Service.checkProjectLogo(
+                    req.app.get("db"),
+                    logoId
+                  ).then((projectLogo) => {
                     if (!projectLogo) {
                       return res.status(201).json({
                         project,
@@ -142,8 +147,8 @@ function postProject(req, res, next) {
                     ).then((updatedProjectLogo) => {
                       res.status(201).json({ project, updatedProjectLogo });
                     });
-                  }
-                );
+                  });
+                });
               });
             });
         });

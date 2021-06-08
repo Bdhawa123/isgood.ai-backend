@@ -13,7 +13,7 @@ const handleIndicators = (req, res, next) => {
     .then((indicatorRes) => {
       const { indicators } = indicatorRes.data;
       const concatIndicators = [];
-      for (let i = 0; i < indicators.data.indicators.length; i++) {
+      for (let i = 0; i < indicators.length; i++) {
         concatIndicators.push({
           project_id: indicatorRes.data.projectId,
           indicator_id: indicators[i].indicatorId,

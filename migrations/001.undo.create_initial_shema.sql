@@ -12,6 +12,7 @@ DROP TABLE IF EXISTS beneficiary;
 DROP TABLE IF EXISTS org_user;
 DROP TABLE IF EXISTS project_user;
 DROP TABLE IF EXISTS indicator;
+DROP TABLE IF EXISTS indicator_current;
 DROP TABLE IF EXISTS impact;
 DROP TABLE IF EXISTS outcome;
 DROP TABLE IF EXISTS org_logo;
