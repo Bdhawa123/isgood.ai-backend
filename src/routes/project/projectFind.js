@@ -21,6 +21,7 @@ function findProject(req, res, next) {
           project.outcomes = outcomes;
           project.beneficiaries = req.beneficiaries;
           project.logo_location = req.logo_location;
+          project.indicator_status = req.status;
           res.status(200).json(project);
         });
       });
@@ -112,9 +113,21 @@ function getProjectLogo(req, res, next) {
     .catch(next);
 }
 
+function getIndicatorStatus(req, res, next) {
+  const { projectId } = req.params;
+
+  ProjectService.getIndicatorStatus(req.app.get("db"), projectId)
+    .then((status) => {
+      req.status = status.up_to_date;
+      next();
+    })
+    .catch(next);
+}
+
 module.exports = {
   findProject,
   getBeneficiaries,
   checkProjectExists,
   getProjectLogo,
+  getIndicatorStatus,
 };
