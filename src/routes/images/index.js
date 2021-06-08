@@ -7,7 +7,7 @@ const { getImage } = require("./imageFind");
 
 const imagesRouter = express.Router();
 
-imagesRouter.route("/:imageId").get(getImage);
+imagesRouter.route("/:imageId").get(jwtCheck, getImage);
 
 imagesRouter.route("/org").post(jwtCheck, uploadS3.any(), orgLogoCreate);
 
