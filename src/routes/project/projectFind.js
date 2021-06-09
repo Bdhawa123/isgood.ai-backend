@@ -21,6 +21,8 @@ function findProject(req, res, next) {
           project.outcomes = outcomes;
           project.beneficiaries = req.beneficiaries;
           project.logo_location = req.logo_location;
+          project.banner_location = req.banner_location;
+          project.indicator_status = req.status;
           res.status(200).json(project);
         });
       });
@@ -100,7 +102,7 @@ function checkProjectExists(req, res, next) {
 function getProjectLogo(req, res, next) {
   const { projectId } = req.params;
 
-  AWS_S3_Service.getByProjectId(req.app.get("db"), projectId)
+  AWS_S3_Service.getLogoByProjectId(req.app.get("db"), projectId)
     .then((projectLogo) => {
       if (!projectLogo) {
         next();
@@ -112,9 +114,37 @@ function getProjectLogo(req, res, next) {
     .catch(next);
 }
 
+function getProjectBanner(req, res, next) {
+  const { projectId } = req.params;
+
+  AWS_S3_Service.getBannerByProjectId(req.app.get("db"), projectId)
+    .then((projectBanner) => {
+      if (!projectBanner) {
+        next();
+      } else {
+        req.banner_location = projectBanner.location;
+        next();
+      }
+    })
+    .catch(next);
+}
+
+function getIndicatorStatus(req, res, next) {
+  const { projectId } = req.params;
+
+  ProjectService.getIndicatorStatus(req.app.get("db"), projectId)
+    .then((status) => {
+      req.status = status.up_to_date;
+      next();
+    })
+    .catch(next);
+}
+
 module.exports = {
   findProject,
   getBeneficiaries,
   checkProjectExists,
   getProjectLogo,
+  getIndicatorStatus,
+  getProjectBanner,
 };

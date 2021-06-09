@@ -37,7 +37,7 @@ const AWS_S3_Service = {
 
     return s3.getObject(params).createReadStream();
   },
-
+  // org logo methods
   createOrgLogo(db, newLogo) {
     return db
       .insert(newLogo)
@@ -62,15 +62,46 @@ const AWS_S3_Service = {
       })
       .update(newOrgLogo)
       .returning("*")
-      .then((rows) => {
-        return rows[0];
-      });
+      .then((rows) => rows[0]);
   },
 
   getOrgLogos(db, orgId) {
     return db.select("*").from("org_logo").whereIn("org_id", orgId);
   },
 
+  // orgBanner methods
+  createOrgBanner(db, newBanner) {
+    return db
+      .insert(newBanner)
+      .into("org_banner")
+      .returning("id")
+      .then(([bannerId]) => bannerId);
+  },
+
+  checkOrgBanner(knex, id) {
+    return knex("org_banner")
+      .select("*")
+      .where({
+        id: id,
+      })
+      .first();
+  },
+
+  updateOrgBanner(knex, id, newOrgBanner) {
+    return knex("org_banner")
+      .where({
+        id: id,
+      })
+      .update(newOrgBanner)
+      .returning("*")
+      .then((rows) => rows[0]);
+  },
+
+  getOrgBanners(db, orgId) {
+    return db.select("*").from("org_banner").whereIn("org_id", orgId);
+  },
+
+  // Project Logo methods
   createProjectLogo(db, newLogo) {
     return db
       .insert(newLogo)
@@ -95,17 +126,59 @@ const AWS_S3_Service = {
       })
       .update(newProjectLogo)
       .returning("*")
-      .then((rows) => {
-        return rows[0];
-      });
+      .then((rows) => rows[0]);
   },
 
   getProjectLogos(db, projectId) {
     return db.select("*").from("project_logo").whereIn("project_id", projectId);
   },
 
-  getByProjectId(knex, project_id) {
+  getLogoByProjectId(knex, project_id) {
     return knex("project_logo")
+      .select("location")
+      .where({
+        project_id: project_id,
+      })
+      .first();
+  },
+
+  // Project banner methods
+  createProjectBanner(db, newBanner) {
+    return db
+      .insert(newBanner)
+      .into("project_banner")
+      .returning("id")
+      .then(([bannerId]) => bannerId);
+  },
+
+  checkProjectBanner(knex, id) {
+    return knex("project_banner")
+      .select("*")
+      .where({
+        id: id,
+      })
+      .first();
+  },
+
+  updateProjectBanner(knex, id, newProjectBanner) {
+    return knex("project_banner")
+      .where({
+        id: id,
+      })
+      .update(newProjectBanner)
+      .returning("*")
+      .then((rows) => rows[0]);
+  },
+
+  getProjectBanners(db, projectId) {
+    return db
+      .select("*")
+      .from("project_banner")
+      .whereIn("project_id", projectId);
+  },
+
+  getBannerByProjectId(knex, project_id) {
+    return knex("project_banner")
       .select("location")
       .where({
         project_id: project_id,

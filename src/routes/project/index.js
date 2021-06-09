@@ -14,7 +14,9 @@ const {
   checkProjectExists,
   getBeneficiaries,
   getProjectLogo,
+  getIndicatorStatus,
   findProject,
+  getProjectBanner,
 } = require("./projectFind");
 const { updateProject } = require("./projectUpdate");
 
@@ -36,6 +38,8 @@ projectRouter
     checkProjectRead,
     getBeneficiaries,
     getProjectLogo,
+    getProjectBanner,
+    getIndicatorStatus,
     findProject
   )
   .patch(checkProjectExists, jsonBodyParser, checkProjectUpdate, updateProject);

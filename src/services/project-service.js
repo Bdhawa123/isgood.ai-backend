@@ -6,6 +6,13 @@ const ProjectService = {
       .returning(["project_id", "org_id"])
       .then(([project]) => project);
   },
+  createIndicatorCurrent(db, projectId) {
+    return db
+      .insert(projectId)
+      .into("indicator_current")
+      .returning("*")
+      .then(([current]) => current);
+  },
   createIndicators(knex, indicators) {
     return knex("indicator").insert(indicators, ["*"]);
   },
@@ -52,7 +59,7 @@ const ProjectService = {
   },
   getProjects(db, projectId) {
     return db
-      .select("project_id", "name", "description", "org_id")
+      .select("project_id", "name", "updated_at", "description", "org_id")
       .from("project")
       .whereIn("project_id", projectId);
   },
@@ -70,6 +77,7 @@ const ProjectService = {
       .select(
         "project_id",
         "name",
+        "updated_at",
         "description",
         "geolocation",
         "start_date",
@@ -79,6 +87,13 @@ const ProjectService = {
       .where({
         project_id: id,
       })
+      .first();
+  },
+  getIndicatorStatus(db, projectId) {
+    return db
+      .select("up_to_date")
+      .from("indicator_current")
+      .where({ project_id: projectId })
       .first();
   },
   getIndicators(db, projectId) {
