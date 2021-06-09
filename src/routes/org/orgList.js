@@ -28,11 +28,22 @@ function listOrgs(req, res, next) {
             for (let i = 0; i < orgs.length; i++) {
               for (let j = 0; j < orgLogos.length; j++) {
                 if (orgs[i].org_id === orgLogos[j].org_id) {
-                  orgs[i].logo_location = orgLogos[j].location;
+                  orgs[i].org_logo = orgLogos[j].location;
                 }
               }
             }
-            res.status(200).json(orgs);
+            AWS_S3_Service.getOrgBanners(req.app.get("db"), orgIds).then(
+              (orgBanner) => {
+                for (let i = 0; i < orgs.length; i++) {
+                  for (let j = 0; j < orgBanner.length; j++) {
+                    if (orgs[i].org_id === orgBanner[j].org_id) {
+                      orgs[i].org_banner = orgBanner[j].location;
+                    }
+                  }
+                }
+                res.status(200).json(orgs);
+              }
+            );
           }
         );
       })
