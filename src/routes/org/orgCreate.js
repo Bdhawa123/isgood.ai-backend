@@ -3,11 +3,12 @@ const OrgService = require("../../services/org-service");
 const { RoleService } = require("../../services/role-service");
 const AWS_S3_Service = require("../../services/aws-s3-service");
 
-function postOrg(req, res, next) {
+const postOrg = async (req, res, next) => {
   const userId = req.user.sub;
   const { roleId } = req;
 
-  const { name, url, handle, description, region, sector, logoId } = req.body;
+  const { name, url, handle, description, region, sector, logoId, bannerId } =
+    req.body;
   // Sanitize     !!! We need to verify the url is a url !!!
   const newOrg = {
     name: xss(name),
@@ -29,44 +30,40 @@ function postOrg(req, res, next) {
 
   // Create Organization
 
-  OrgService.createOrg(req.app.get("db"), newOrg).then((org) => {
-    // Now create an orgUser entry
-    OrgService.createOrgUser(req.app.get("db"), {
-      user_id: userId,
-      org_id: org.org_id,
-      role_id: roleId,
-    })
-      // Update User so we know the last org they were logged into
-      .then((orgUser) => {
-        if (!logoId) {
-          return res.status(201).json(org);
-        }
-
-        AWS_S3_Service.checkOrgLogo(req.app.get("db"), logoId).then(
-          (orgLogo) => {
-            if (!orgLogo) {
-              return res.status(201).json({
-                org,
-                error: { message: `No logo with id: ${logoId}` },
-              });
-            }
-            const newOrgLogo = {
-              org_id: org.org_id,
-            };
-            AWS_S3_Service.updateOrgLogo(
-              req.app.get("db"),
-              logoId,
-              newOrgLogo
-            ).then((updatedOrgLogo) => {
-              res.status(201).json({ org, updatedOrgLogo });
-            });
-          }
-        );
-      })
-      // Should we write some custom error handlers? https://expressjs.com/en/guide/error-handling.html
-      .catch(next);
+  const org = await OrgService.createOrg(req.app.get("db"), newOrg);
+  // Now create an orgUser entry
+  await OrgService.createOrgUser(req.app.get("db"), {
+    user_id: userId,
+    org_id: org.org_id,
+    role_id: roleId,
   });
-}
+
+  const newOrgId = {
+    org_id: org.org_id,
+  };
+
+  if (req.logoExist) {
+    const orgLogo = await AWS_S3_Service.updateOrgLogo(
+      req.app.get("db"),
+      logoId,
+      newOrgId
+    );
+
+    org.org_logo = orgLogo.location;
+  }
+
+  if (req.bannerExist) {
+    const orgBanner = await AWS_S3_Service.updateOrgBanner(
+      req.app.get("db"),
+      bannerId,
+      newOrgId
+    );
+
+    org.org_banner = orgBanner.location;
+  }
+
+  res.status(201).json(org);
+};
 
 function getRoleId(req, res, next) {
   const roleName = req.body.role;
@@ -93,7 +90,53 @@ function getRoleId(req, res, next) {
   }
 }
 
+function checkOrgLogo(req, res, next) {
+  const { logoId } = req.body;
+
+  const logoCheck = "logoId" in req.body;
+  if (!logoCheck) {
+    return res.status(400).json({
+      error: { message: `Missing logoId in request body` },
+    });
+  }
+
+  AWS_S3_Service.checkOrgLogo(req.app.get("db"), logoId)
+    .then((logo) => {
+      if (!logo) {
+        req.logoExist = false;
+      } else {
+        req.logoExist = true;
+      }
+      next();
+    })
+    .catch(next);
+}
+
+function checkOrgBanner(req, res, next) {
+  const { bannerId } = req.body;
+
+  const bannerCheck = "logoId" in req.body;
+  if (!bannerCheck) {
+    return res.status(400).json({
+      error: { message: `Missing bannerId in request body` },
+    });
+  }
+
+  AWS_S3_Service.checkOrgBanner(req.app.get("db"), bannerId)
+    .then((banner) => {
+      if (!banner) {
+        req.bannerExist = false;
+      } else {
+        req.bannerExist = true;
+      }
+      next();
+    })
+    .catch(next);
+}
+
 module.exports = {
   postOrg,
   getRoleId,
+  checkOrgLogo,
+  checkOrgBanner,
 };

@@ -16,6 +16,7 @@ const {
   getProjectLogo,
   getIndicatorStatus,
   findProject,
+  getProjectBanner,
 } = require("./projectFind");
 const { updateProject } = require("./projectUpdate");
 
@@ -37,6 +38,7 @@ projectRouter
     checkProjectRead,
     getBeneficiaries,
     getProjectLogo,
+    getProjectBanner,
     getIndicatorStatus,
     findProject
   )

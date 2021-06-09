@@ -83,6 +83,16 @@ CREATE TABLE "org_logo" (
     FOREIGN KEY ("org_id") REFERENCES "org"("org_id") ON DELETE CASCADE
 );
 
+-- CreateTable
+CREATE TABLE "org_banner" (
+    "id" TEXT NOT NULL DEFAULT concat('ob-', generate_uid(6)) UNIQUE,
+    "location" TEXT,
+    "org_id" TEXT,
+
+    PRIMARY KEY ("id"),
+    FOREIGN KEY ("org_id") REFERENCES "org"("org_id") ON DELETE CASCADE
+);
+
 
 -- CreateTable
 CREATE TABLE "project" (
@@ -105,6 +115,16 @@ CREATE TABLE "project" (
 -- CreateTable
 CREATE TABLE "project_logo" (
     "id" TEXT NOT NULL DEFAULT concat('pl-', generate_uid(6)) UNIQUE,
+    "location" TEXT,
+    "project_id" TEXT,
+    
+    PRIMARY KEY ("id"),
+    FOREIGN KEY ("project_id") REFERENCES "project"("project_id") ON DELETE CASCADE
+);
+
+-- CreateTable
+CREATE TABLE "project_banner" (
+    "id" TEXT NOT NULL DEFAULT concat('pb-', generate_uid(6)) UNIQUE,
     "location" TEXT,
     "project_id" TEXT,
     
@@ -244,7 +264,7 @@ $set_org_timestamp$ LANGUAGE plpgsql;
 CREATE TRIGGER set_org_timestamp
 AFTER INSERT OR UPDATE OR DELETE ON org_logo
 FOR EACH ROW
-EXECUTE PROCEDURE set_timestamp_project();
+EXECUTE PROCEDURE set_timestamp_org();
 
 -- ------------------------------ trigger update project.updated_at ------------------------- --
 
