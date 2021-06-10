@@ -26,11 +26,36 @@ function listProjects(req, res, next) {
               for (let i = 0; i < projects.length; i++) {
                 for (let j = 0; j < projectLogos.length; j++) {
                   if (projects[i].project_id === projectLogos[j].project_id) {
-                    projects[i].logo_location = projectLogos[j].location;
+                    projects[i].logo = {
+                      location: projectLogos[j].location,
+                      id: projectLogos[j].id,
+                    };
+                  } else {
+                    projects[i].logo = {};
                   }
                 }
               }
-              res.status(200).json(projects);
+
+              AWS_S3_Service.getProjectBanners(
+                req.app.get("db"),
+                projectIds
+              ).then((projectBanners) => {
+                for (let i = 0; i < projects.length; i++) {
+                  for (let j = 0; j < projectBanners.length; j++) {
+                    if (
+                      projects[i].project_id === projectBanners[j].project_id
+                    ) {
+                      projects[i].banner = {
+                        location: projectBanners[j].location,
+                        id: projectBanners[j].id,
+                      };
+                    } else {
+                      projects[i].banner = {};
+                    }
+                  }
+                }
+                res.status(200).json(projects);
+              });
             }
           );
         }

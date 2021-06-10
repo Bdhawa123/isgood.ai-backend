@@ -28,7 +28,6 @@ const AWS_S3_Service = {
   },
 
   // get a file from s3
-
   getImage(fileName) {
     const params = {
       Key: fileName,
@@ -37,6 +36,7 @@ const AWS_S3_Service = {
 
     return s3.getObject(params).createReadStream();
   },
+
   // org logo methods
   createOrgLogo(db, newLogo) {
     return db
@@ -135,7 +135,7 @@ const AWS_S3_Service = {
 
   getLogoByProjectId(knex, project_id) {
     return knex("project_logo")
-      .select("location")
+      .select("*")
       .where({
         project_id: project_id,
       })
@@ -179,7 +179,7 @@ const AWS_S3_Service = {
 
   getBannerByProjectId(knex, project_id) {
     return knex("project_banner")
-      .select("location")
+      .select("*")
       .where({
         project_id: project_id,
       })

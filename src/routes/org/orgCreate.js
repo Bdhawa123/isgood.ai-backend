@@ -28,41 +28,48 @@ const postOrg = async (req, res, next) => {
   newOrg.plan = "free";
   newOrg.plan_status = "active";
 
-  // Create Organization
+  try {
+    // Create Organization
+    const org = await OrgService.createOrg(req.app.get("db"), newOrg);
+    // Now create an orgUser entry
+    await OrgService.createOrgUser(req.app.get("db"), {
+      user_id: userId,
+      org_id: org.org_id,
+      role_id: roleId,
+    });
 
-  const org = await OrgService.createOrg(req.app.get("db"), newOrg);
-  // Now create an orgUser entry
-  await OrgService.createOrgUser(req.app.get("db"), {
-    user_id: userId,
-    org_id: org.org_id,
-    role_id: roleId,
-  });
+    const newOrgId = {
+      org_id: org.org_id,
+    };
 
-  const newOrgId = {
-    org_id: org.org_id,
-  };
+    if (req.logoExist) {
+      const orgLogo = await AWS_S3_Service.updateOrgLogo(
+        req.app.get("db"),
+        logoId,
+        newOrgId
+      );
 
-  if (req.logoExist) {
-    const orgLogo = await AWS_S3_Service.updateOrgLogo(
-      req.app.get("db"),
-      logoId,
-      newOrgId
-    );
+      org.logo = { location: orgLogo.location, id: orgLogo.id };
+    } else {
+      org.logo = {};
+    }
 
-    org.org_logo = orgLogo.location;
+    if (req.bannerExist) {
+      const orgBanner = await AWS_S3_Service.updateOrgBanner(
+        req.app.get("db"),
+        bannerId,
+        newOrgId
+      );
+
+      org.banner = { location: orgBanner.location, id: orgBanner.id };
+    } else {
+      org.banner = {};
+    }
+
+    res.status(201).json(org);
+  } catch (err) {
+    next(err);
   }
-
-  if (req.bannerExist) {
-    const orgBanner = await AWS_S3_Service.updateOrgBanner(
-      req.app.get("db"),
-      bannerId,
-      newOrgId
-    );
-
-    org.org_banner = orgBanner.location;
-  }
-
-  res.status(201).json(org);
 };
 
 function getRoleId(req, res, next) {
@@ -115,7 +122,7 @@ function checkOrgLogo(req, res, next) {
 function checkOrgBanner(req, res, next) {
   const { bannerId } = req.body;
 
-  const bannerCheck = "logoId" in req.body;
+  const bannerCheck = "bannerId" in req.body;
   if (!bannerCheck) {
     return res.status(400).json({
       error: { message: `Missing bannerId in request body` },

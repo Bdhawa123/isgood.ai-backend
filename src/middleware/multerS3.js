@@ -29,4 +29,51 @@ const uploadS3 = multer({
   }),
 });
 
-module.exports = uploadS3;
+const updateS3 = multer({
+  storage: multerS3({
+    s3: s3,
+    bucket: bucketName,
+    // acl: 'public-read', //For public permissions later
+    metadata: function (req, file, cb) {
+      cb(null, { fieldName: file.fieldname });
+    },
+    key: function (req, file, cb) {
+      // add unique Id ???
+      cb(null, Date.now().toString());
+    },
+  }),
+});
+
+const imageDelete = async (req, res, next) => {
+  const { locationId } = req.query;
+
+  if (!locationId) {
+    return res.status(400).json({
+      error: { message: `Missing locationId in query` },
+    });
+  }
+
+  try {
+    const params = {
+      Bucket: bucketName,
+      Key: locationId,
+    };
+    s3.deleteObject(params, (error, data) => {
+      if (error) {
+        if (error.statusCode && error.message) {
+          return res.status(error.statusCode).send(error.message);
+        }
+        return res.status(500).send("Issue deleting object");
+      }
+      next();
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = {
+  uploadS3,
+  updateS3,
+  imageDelete,
+};

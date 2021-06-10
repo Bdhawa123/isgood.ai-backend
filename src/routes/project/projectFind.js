@@ -20,8 +20,8 @@ function findProject(req, res, next) {
           project.impacts = impacts;
           project.outcomes = outcomes;
           project.beneficiaries = req.beneficiaries;
-          project.logo_location = req.logo_location;
-          project.banner_location = req.banner_location;
+          project.logo = req.logo;
+          project.banner = req.banner;
           project.indicator_status = req.status;
           res.status(200).json(project);
         });
@@ -105,9 +105,12 @@ function getProjectLogo(req, res, next) {
   AWS_S3_Service.getLogoByProjectId(req.app.get("db"), projectId)
     .then((projectLogo) => {
       if (!projectLogo) {
-        next();
+        req.logo = {};
       } else {
-        req.logo_location = projectLogo.location;
+        req.logo = {
+          location: projectLogo.location,
+          id: projectLogo.id,
+        };
         next();
       }
     })
@@ -120,9 +123,12 @@ function getProjectBanner(req, res, next) {
   AWS_S3_Service.getBannerByProjectId(req.app.get("db"), projectId)
     .then((projectBanner) => {
       if (!projectBanner) {
-        next();
+        req.banner = {};
       } else {
-        req.banner_location = projectBanner.location;
+        req.banner = {
+          location: projectBanner.location,
+          id: projectBanner.id,
+        };
         next();
       }
     })

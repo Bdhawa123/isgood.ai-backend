@@ -9,7 +9,13 @@ const {
   checkProjectUpdate,
 } = require("../../middleware/checkRole");
 const { listProjects } = require("./projectList");
-const { getRoleId, orgExists, postProject } = require("./projectCreate");
+const {
+  getRoleId,
+  orgExists,
+  postProject,
+  checkProjectLogo,
+  checkProjectBanner,
+} = require("./projectCreate");
 const {
   checkProjectExists,
   getBeneficiaries,
@@ -28,6 +34,8 @@ projectRouter.post(
   orgExists,
   checkProjectCreate,
   getRoleId,
+  checkProjectLogo,
+  checkProjectBanner,
   postProject
 );
 projectRouter
