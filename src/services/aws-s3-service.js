@@ -28,6 +28,7 @@ const AWS_S3_Service = {
   },
 
   // get a file from s3
+<<<<<<< HEAD
 
   async getImage(fileName) {
     try {
@@ -45,7 +46,17 @@ const AWS_S3_Service = {
     } catch (err) {
       console.log(err);
     }
+=======
+  getImage(fileName) {
+    const params = {
+      Key: fileName,
+      Bucket: bucketName,
+    };
+
+    return s3.getObject(params).createReadStream();
+>>>>>>> development
   },
+
   // org logo methods
   createOrgLogo(db, newLogo) {
     return db
@@ -144,7 +155,7 @@ const AWS_S3_Service = {
 
   getLogoByProjectId(knex, project_id) {
     return knex("project_logo")
-      .select("location")
+      .select("*")
       .where({
         project_id: project_id,
       })
@@ -188,7 +199,7 @@ const AWS_S3_Service = {
 
   getBannerByProjectId(knex, project_id) {
     return knex("project_banner")
-      .select("location")
+      .select("*")
       .where({
         project_id: project_id,
       })

@@ -6,7 +6,7 @@ const ImpactService = require("../../services/impact-service");
 const OutcomeService = require("../../services/outcome-service");
 const AWS_S3_Service = require("../../services/aws-s3-service");
 
-function postProject(req, res, next) {
+const postProject = async (req, res, next) => {
   const userId = req.user.sub;
   const { roleId } = req;
 
@@ -22,6 +22,7 @@ function postProject(req, res, next) {
     endDate,
     coordinates,
     logoId,
+    bannerId,
   } = req.body;
 
   // make sure the fields are not empty
@@ -31,6 +32,7 @@ function postProject(req, res, next) {
     "projectImpacts",
     "outcomesDesired",
     "orgId",
+    "beneficiaries",
   ])
     if (!req.body[field])
       return res.status(400).json({
@@ -84,136 +86,138 @@ function postProject(req, res, next) {
     newProject.geolocation = [xss(coordinates[0]), xss(coordinates[1])];
   }
 
-  // create project table
-  ProjectService.createProject(req.app.get("db"), newProject)
-    .then((project) => {
-      // once project is created.. create impact entry with projectId as FK
-      const newImpacts = [];
-      for (let i = 0; i < projectImpacts.length; i++) {
-        newImpacts.push({
-          project_id: project.project_id,
-          description: xss(projectImpacts[i]),
-        });
-      }
+  try {
+    // create project table
+    const project = await ProjectService.createProject(
+      req.app.get("db"),
+      newProject
+    );
 
-      ImpactService.createImpact(req.app.get("db"), newImpacts)
-        // once impacts are created.. insert projectOutcomes in outcome table
-        .then((impacts) => {
-          const newOutcomes = [];
-          for (let j = 0; j < outcomesDesired.length; j++) {
-            newOutcomes.push({
-              project_id: project.project_id,
-              description: xss(outcomesDesired[j]),
-            });
-          }
-
-          OutcomeService.createOutcome(req.app.get("db"), newOutcomes)
-            // once outcomes are created.. create userProject table
-            .then((outcomes) => {
-              ProjectService.createProjectUser(req.app.get("db"), {
-                project_id: project.project_id,
-                user_id: userId,
-                role_id: roleId,
-              }).then((projectUser) => {
-                if (beneficiaries && beneficiaries.length > 0) {
-                  // eslint-disable-next-line no-use-before-define
-                  setBeneficiaries(project.project_id, beneficiaries);
-                }
-
-                ProjectService.createIndicatorCurrent(req.app.get("db"), {
-                  project_id: project.project_id,
-                }).then((current) => {
-                  if (!logoId) {
-                    return res.status(201).json(project);
-                  }
-
-                  AWS_S3_Service.checkProjectLogo(
-                    req.app.get("db"),
-                    logoId
-                  ).then((projectLogo) => {
-                    if (!projectLogo) {
-                      return res.status(201).json({
-                        project,
-                        error: { message: `No logo with id: ${logoId}` },
-                      });
-                    }
-                    const newProjectLogo = {
-                      project_id: project.project_id,
-                    };
-                    AWS_S3_Service.updateProjectLogo(
-                      req.app.get("db"),
-                      logoId,
-                      newProjectLogo
-                    ).then((updatedProjectLogo) => {
-                      res.status(201).json({ project, updatedProjectLogo });
-                    });
-                  });
-                });
-              });
-            });
-        });
-    })
-    .catch(next);
-
-  // eslint-disable-next-line no-shadow
-  function setBeneficiaries(projectId, beneficiaries) {
-    const newBeneficiaries = [];
-    for (let i = 0; i < beneficiaries.length; i++) {
-      newBeneficiaries.push({
-        project_id: projectId,
-        name: xss(beneficiaries[i].name),
+    // once project is created.. create impact entry with projectId as FK
+    const newImpacts = [];
+    for (let i = 0; i < projectImpacts.length; i++) {
+      newImpacts.push({
+        project_id: project.project_id,
+        description: xss(projectImpacts[i]),
       });
     }
-    ProjectService.createBeneficiaries(req.app.get("db"), newBeneficiaries)
-      // insert demographics into demographic table
-      .then((beneficiaryRes) => {
-        const lifeChanges = [];
-        for (let i = 0; i < beneficiaries.length; i++) {
-          for (let j = 0; j < beneficiaries[i].lifeChange.length; j++) {
-            lifeChanges.push({
+
+    // once project is created.. create outcome entry with projectId as FK
+    const newOutcomes = [];
+    for (let j = 0; j < outcomesDesired.length; j++) {
+      newOutcomes.push({
+        project_id: project.project_id,
+        description: xss(outcomesDesired[j]),
+      });
+    }
+
+    // insert impacts
+    await ImpactService.createImpact(req.app.get("db"), newImpacts);
+    // once impacts are created.. insert projectOutcomes in outcome table
+    await OutcomeService.createOutcome(req.app.get("db"), newOutcomes);
+    // once outcomes are created.. create userProject table
+    await ProjectService.createProjectUser(req.app.get("db"), {
+      project_id: project.project_id,
+      user_id: userId,
+      role_id: roleId,
+    });
+
+    if (beneficiaries.length > 0) {
+      const newBeneficiaries = [];
+      for (let i = 0; i < beneficiaries.length; i++) {
+        newBeneficiaries.push({
+          project_id: project.project_id,
+          name: xss(beneficiaries[i].name),
+        });
+      }
+      // save beneficiaries to db
+      const beneficiaryRes = await ProjectService.createBeneficiaries(
+        req.app.get("db"),
+        newBeneficiaries
+      );
+      const lifeChanges = [];
+      const newDemographics = [];
+      for (let i = 0; i < beneficiaries.length; i++) {
+        const lifeChangeCheck = "lifeChange" in beneficiaries[i];
+        if (!lifeChangeCheck) {
+          return res.status(400).json({
+            error: {
+              message: `Missing lifeChange in ${beneficiaries[i].name}`,
+            },
+          });
+        }
+        for (let j = 0; j < beneficiaries[i].lifeChange.length; j++) {
+          lifeChanges.push({
+            beneficiary_id: beneficiaryRes[i].beneficiary_id,
+            description: xss(beneficiaries[i].lifeChange[j]),
+          });
+        }
+      }
+      // Save life changes to db
+      await ProjectService.createLifeChange(req.app.get("db"), lifeChanges);
+      for (let i = 0; i < beneficiaries.length; i++) {
+        if (beneficiaries[i].demographics) {
+          for (let j = 0; j < beneficiaries[i].demographics.length; j++) {
+            if (
+              !beneficiaries[i].demographics[j].name ||
+              !beneficiaries[i].demographics[j].operator ||
+              !beneficiaries[i].demographics[j].value
+            ) {
+              return res.status(400).json({
+                error: {
+                  message: `Name, operator, and value required in demographics request body`,
+                },
+              });
+            }
+            newDemographics.push({
               beneficiary_id: beneficiaryRes[i].beneficiary_id,
-              description: xss(beneficiaries[i].lifeChange[j]),
+              name: xss(beneficiaries[i].demographics[j].name),
+              operator: xss(beneficiaries[i].demographics[j].operator),
+              value: xss(beneficiaries[i].demographics[j].value),
             });
           }
         }
-        ProjectService.createLifeChange(req.app.get("db"), lifeChanges).then(
-          (lifeChangesRes) => {
-            const newDemographics = [];
-            for (let i = 0; i < beneficiaries.length; i++) {
-              if (beneficiaries[i].demographics) {
-                for (let j = 0; j < beneficiaries[i].demographics.length; j++) {
-                  if (
-                    !beneficiaries[i].demographics[j].name ||
-                    !beneficiaries[i].demographics[j].operator ||
-                    !beneficiaries[i].demographics[j].value
-                  ) {
-                    return res.status(400).json({
-                      error: {
-                        message: `Name, operator, and value required in demographics request body`,
-                      },
-                    });
-                  }
-                  newDemographics.push({
-                    beneficiary_id: beneficiaryRes[i].beneficiary_id,
-                    name: xss(beneficiaries[i].demographics[j].name),
-                    operator: xss(beneficiaries[i].demographics[j].operator),
-                    value: xss(beneficiaries[i].demographics[j].value),
-                  });
-                }
-              }
-            }
-            ProjectService.createDemographics(
-              req.app.get("db"),
-              newDemographics
-            ).then((demographics) => {
-              next();
-            });
-          }
-        );
-      })
-      .catch(next);
+      }
+      await ProjectService.createDemographics(
+        req.app.get("db"),
+        newDemographics
+      );
+    }
+    // create entry in indicator_current table
+    await ProjectService.createIndicatorCurrent(req.app.get("db"), {
+      project_id: project.project_id,
+    });
+
+    const newProjectId = { project_id: project.project_id };
+    //   save project logo and banner to db if they exist
+    if (req.logoExist) {
+      const projectLogo = await AWS_S3_Service.updateProjectLogo(
+        req.app.get("db"),
+        logoId,
+        newProjectId
+      );
+
+      project.project_logo = projectLogo.location;
+    } else {
+      project.project_logo = "";
+    }
+
+    if (req.bannerExist) {
+      const projectBanner = await AWS_S3_Service.updateProjectBanner(
+        req.app.get("db"),
+        bannerId,
+        newProjectId
+      );
+
+      project.project_banner = projectBanner.location;
+    } else {
+      project.project_banner = "";
+    }
+    res.status(201).json(project);
+  } catch (err) {
+    next(err);
   }
-}
+};
 
 function getRoleId(req, res, next) {
   const roleName = req.body.role;
@@ -259,8 +263,54 @@ function orgExists(req, res, next) {
   }
 }
 
+function checkProjectLogo(req, res, next) {
+  const { logoId } = req.body;
+
+  const logoCheck = "logoId" in req.body;
+  if (!logoCheck) {
+    return res.status(400).json({
+      error: { message: `Missing logoId in request body` },
+    });
+  }
+
+  AWS_S3_Service.checkProjectLogo(req.app.get("db"), logoId)
+    .then((logo) => {
+      if (!logo) {
+        req.logoExist = false;
+      } else {
+        req.logoExist = true;
+      }
+      next();
+    })
+    .catch(next);
+}
+
+function checkProjectBanner(req, res, next) {
+  const { bannerId } = req.body;
+
+  const bannerCheck = "bannerId" in req.body;
+  if (!bannerCheck) {
+    return res.status(400).json({
+      error: { message: `Missing bannerId in request body` },
+    });
+  }
+
+  AWS_S3_Service.checkProjectBanner(req.app.get("db"), bannerId)
+    .then((banner) => {
+      if (!banner) {
+        req.bannerExist = false;
+      } else {
+        req.bannerExist = true;
+      }
+      next();
+    })
+    .catch(next);
+}
+
 module.exports = {
   postProject,
   getRoleId,
   orgExists,
+  checkProjectLogo,
+  checkProjectBanner,
 };
