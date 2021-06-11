@@ -28,13 +28,23 @@ const AWS_S3_Service = {
   },
 
   // get a file from s3
-  getImage(fileName) {
-    const params = {
-      Key: fileName,
-      Bucket: bucketName,
-    };
 
-    return s3.getObject(params).createReadStream();
+  async getImage(fileName) {
+    try {
+      const params = {
+        Key: fileName,
+        Bucket: bucketName,
+      };
+
+      return s3
+        .getObject(params, (err, data) => {
+          if (err) console.log(err, err.stack);
+          else console.log("success");
+        })
+        .createReadStream();
+    } catch (err) {
+      console.log(err);
+    }
   },
 
   // org logo methods
