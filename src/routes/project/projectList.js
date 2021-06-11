@@ -26,12 +26,13 @@ function listProjects(req, res, next) {
               for (let i = 0; i < projects.length; i++) {
                 for (let j = 0; j < projectLogos.length; j++) {
                   if (projects[i].project_id === projectLogos[j].project_id) {
-                    projects[i].logo = {
+                    projects[i].project_logo = {
                       location: projectLogos[j].location,
                       id: projectLogos[j].id,
                     };
+                    i++;
                   } else {
-                    projects[i].logo = {};
+                    projects[i].project_logo = {};
                   }
                 }
               }
@@ -45,12 +46,12 @@ function listProjects(req, res, next) {
                     if (
                       projects[i].project_id === projectBanners[j].project_id
                     ) {
-                      projects[i].banner = {
+                      projects[i].project_banner = {
                         location: projectBanners[j].location,
                         id: projectBanners[j].id,
                       };
                     } else {
-                      projects[i].banner = {};
+                      projects[i].project_banner = {};
                     }
                   }
                 }
