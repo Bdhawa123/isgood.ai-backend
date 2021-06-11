@@ -26,6 +26,9 @@ function listOrgs(req, res, next) {
         AWS_S3_Service.getOrgLogos(req.app.get("db"), orgIds).then(
           (orgLogos) => {
             for (let i = 0; i < orgs.length; i++) {
+              if (orgLogos.length === 0) {
+                orgs[i].org_logo = {};
+              }
               for (let j = 0; j < orgLogos.length; j++) {
                 if (orgs[i].org_id === orgLogos[j].org_id) {
                   orgs[i].org_logo = {
@@ -37,15 +40,20 @@ function listOrgs(req, res, next) {
                 }
               }
             }
+            console.log(orgLogos);
             AWS_S3_Service.getOrgBanners(req.app.get("db"), orgIds).then(
               (orgBanner) => {
                 for (let i = 0; i < orgs.length; i++) {
+                  if (orgBanner.length === 0) {
+                    orgs[i].org_banner = {};
+                  }
                   for (let j = 0; j < orgBanner.length; j++) {
                     if (orgs[i].org_id === orgBanner[j].org_id) {
                       orgs[i].org_banner = {
                         location: orgBanner[j].location,
                         id: orgBanner[j].id,
                       };
+                      i++;
                     } else {
                       orgs[i].org_banner = {};
                     }

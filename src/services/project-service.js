@@ -57,11 +57,27 @@ const ProjectService = {
       .join("roles", "roles.id", "=", "project_user.role_id")
       .select("project_user.project_id", "project_user.status", "roles.name");
   },
+  getProjectIdFromProjectUser(knex, userId, orgId) {
+    return knex("project_user")
+      .select("*")
+      .where({ user_id: userId, org_id: orgId })
+      .join("roles", "roles.id", "=", "project_user.role_id")
+      .select("project_user.project_id", "project_user.status", "roles.name")
+      .then((rows) => {
+        return rows[0];
+      });
+  },
   getProjects(db, projectId) {
     return db
       .select("project_id", "name", "updated_at", "description", "org_id")
       .from("project")
       .whereIn("project_id", projectId);
+  },
+  getProjectsByOrgId(db, orgId) {
+    return db
+      .select("project_id", "name", "updated_at", "description", "org_id")
+      .from("project")
+      .whereIn("org_id", orgId);
   },
   checkProjectForUser(knex, userId, projectId) {
     return knex("project_user")

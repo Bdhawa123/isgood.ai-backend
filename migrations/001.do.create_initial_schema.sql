@@ -151,6 +151,7 @@ CREATE TABLE "org_user" (
 CREATE TABLE "project_user" (
     "id" TEXT NOT NULL DEFAULT concat('pu-', generate_uid(6)) UNIQUE,
     "project_id" TEXT NOT NULL,
+    "org_id" TEXT NOT NULL,
     "user_id" TEXT NOT NULL,
     "role_id" INTEGER NOT NULL,
     "status" BOOLEAN NOT NULL DEFAULT true,
