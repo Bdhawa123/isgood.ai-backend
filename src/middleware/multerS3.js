@@ -45,18 +45,18 @@ const updateS3 = multer({
 });
 
 const imageDelete = async (req, res, next) => {
-  const { locationId } = req.query;
+  const { location } = req.query;
 
-  if (!locationId) {
+  if (!location) {
     return res.status(400).json({
-      error: { message: `Missing locationId in query` },
+      error: { message: `Missing location in query` },
     });
   }
 
   try {
     const params = {
       Bucket: bucketName,
-      Key: locationId,
+      Key: location,
     };
     s3.deleteObject(params, (error, data) => {
       if (error) {
