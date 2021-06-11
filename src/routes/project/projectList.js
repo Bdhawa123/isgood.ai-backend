@@ -84,17 +84,17 @@ const listProjects = async (req, res, next) => {
 
     for (let i = 0; i < mergedProjects.length; i++) {
       if (projectLogos.length === 0) {
-        mergedProjects[i].org_logo = {};
+        mergedProjects[i].project_logo = {};
       }
       for (let j = 0; j < projectLogos.length; j++) {
         if (mergedProjects[i].project_id === projectLogos[j].project_id) {
-          mergedProjects[i].logo = {
+          mergedProjects[i].project_logo = {
             location: projectLogos[j].location,
             id: projectLogos[j].id,
           };
           i++;
         } else {
-          mergedProjects[i].logo = {};
+          mergedProjects[i].project_logo = {};
         }
       }
     }
@@ -106,16 +106,17 @@ const listProjects = async (req, res, next) => {
 
     for (let i = 0; i < mergedProjects.length; i++) {
       if (projectBanners.length === 0) {
-        mergedProjects[i].org_banner = {};
+        mergedProjects[i].project_banner = {};
       }
       for (let j = 0; j < projectBanners.length; j++) {
         if (mergedProjects[i].project_id === projectBanners[j].project_id) {
-          mergedProjects[i].banner = {
+          mergedProjects[i].project_banner = {
             location: projectBanners[j].location,
             id: projectBanners[j].id,
           };
+          i++;
         } else {
-          mergedProjects[i].banner = {};
+          mergedProjects[i].project_banner = {};
         }
       }
     }

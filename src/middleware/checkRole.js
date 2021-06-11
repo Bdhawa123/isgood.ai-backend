@@ -56,6 +56,7 @@ function checkProjectUpdate(req, res, next) {
           });
         }
         req.role = role;
+
         next();
       });
     })
