@@ -2,8 +2,8 @@ require("dotenv").config();
 const fs = require("fs");
 const S3 = require("aws-sdk/clients/s3");
 
-const accessKey = process.env.S3_KEY;
-const secretKey = process.env.S3_SECRET;
+const accessKey = process.env.AWS_ACCESS_KEY_ID;
+const secretKey = process.env.AWS_SECRET_ACCESS_KEY;
 const bucketName = process.env.BUCKET_NAME;
 const region = process.env.BUCKET_REGION;
 
@@ -28,6 +28,25 @@ const AWS_S3_Service = {
   },
 
   // get a file from s3
+<<<<<<< HEAD
+
+  async getImage(fileName) {
+    try {
+      const params = {
+        Key: fileName,
+        Bucket: bucketName,
+      };
+
+      return s3
+        .getObject(params, (err, data) => {
+          if (err) console.log(err, err.stack);
+          else console.log(data);
+        })
+        .createReadStream();
+    } catch (err) {
+      console.log(err);
+    }
+=======
   getImage(fileName) {
     const params = {
       Key: fileName,
@@ -35,6 +54,7 @@ const AWS_S3_Service = {
     };
 
     return s3.getObject(params).createReadStream();
+>>>>>>> development
   },
 
   // org logo methods

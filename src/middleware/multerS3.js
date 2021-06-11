@@ -4,8 +4,8 @@ const multerS3 = require("multer-s3");
 const S3 = require("aws-sdk/clients/s3");
 const crypto = require("crypto");
 
-const accessKey = process.env.S3_KEY;
-const secretKey = process.env.S3_SECRET;
+const accessKey = process.env.AWS_ACCESS_KEY_ID;
+const secretKey = process.env.AWS_SECRET_ACCESS_KEY;
 const bucketName = process.env.BUCKET_NAME;
 const region = process.env.BUCKET_REGION;
 
