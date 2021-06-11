@@ -1,7 +1,7 @@
 const express = require("express");
 const { default: axios } = require("axios");
 const AuthService = require("../services/auth-service");
-const uploadS3 = require("../middleware/multerS3");
+const { uploadS3 } = require("../middleware/multerS3");
 const jwtCheck = require("../middleware/oAuth");
 
 const usersRouter = express.Router();

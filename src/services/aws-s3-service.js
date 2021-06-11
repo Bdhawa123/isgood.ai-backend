@@ -28,7 +28,6 @@ const AWS_S3_Service = {
   },
 
   // get a file from s3
-<<<<<<< HEAD
 
   async getImage(fileName) {
     try {
@@ -40,21 +39,12 @@ const AWS_S3_Service = {
       return s3
         .getObject(params, (err, data) => {
           if (err) console.log(err, err.stack);
-          else console.log(data);
+          else console.log("success");
         })
         .createReadStream();
     } catch (err) {
       console.log(err);
     }
-=======
-  getImage(fileName) {
-    const params = {
-      Key: fileName,
-      Bucket: bucketName,
-    };
-
-    return s3.getObject(params).createReadStream();
->>>>>>> development
   },
 
   // org logo methods
