@@ -2,11 +2,19 @@ require("dotenv").config();
 const multer = require("multer");
 const multerS3 = require("multer-s3");
 const S3 = require("aws-sdk/clients/s3");
+const crypto = require("crypto");
 
 const accessKey = process.env.S3_KEY;
 const secretKey = process.env.S3_SECRET;
 const bucketName = process.env.BUCKET_NAME;
 const region = process.env.BUCKET_REGION;
+
+// Function to generate unique ID
+const uniqueID = () => {
+  const idSize = 8
+  const id = crypto.randomBytes(Math.ceil(idSize/2)).toString('hex').slice(0, idSize);
+  return id;
+}
 
 const s3 = new S3({
   region,
@@ -24,7 +32,7 @@ const uploadS3 = multer({
     },
     key: function (req, file, cb) {
       // add unique Id ???
-      cb(null, Date.now().toString());
+      cb(null, uniqueID());
     },
   }),
 });
