@@ -111,8 +111,8 @@ function getProjectLogo(req, res, next) {
           location: projectLogo.location,
           id: projectLogo.id,
         };
-        next();
       }
+      next();
     })
     .catch(next);
 }
@@ -129,8 +129,8 @@ function getProjectBanner(req, res, next) {
           location: projectBanner.location,
           id: projectBanner.id,
         };
-        next();
       }
+      next();
     })
     .catch(next);
 }

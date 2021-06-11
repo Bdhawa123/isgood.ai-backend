@@ -11,10 +11,13 @@ const region = process.env.BUCKET_REGION;
 
 // Function to generate unique ID
 const uniqueID = () => {
-  const idSize = 8
-  const id = crypto.randomBytes(Math.ceil(idSize/2)).toString('hex').slice(0, idSize);
+  const idSize = 8;
+  const id = crypto
+    .randomBytes(Math.ceil(idSize / 2))
+    .toString("hex")
+    .slice(0, idSize);
   return id;
-}
+};
 
 const s3 = new S3({
   region,
@@ -33,21 +36,6 @@ const uploadS3 = multer({
     key: function (req, file, cb) {
       // add unique Id ???
       cb(null, uniqueID());
-    },
-  }),
-});
-
-const updateS3 = multer({
-  storage: multerS3({
-    s3: s3,
-    bucket: bucketName,
-    // acl: 'public-read', //For public permissions later
-    metadata: function (req, file, cb) {
-      cb(null, { fieldName: file.fieldname });
-    },
-    key: function (req, file, cb) {
-      // add unique Id ???
-      cb(null, Date.now().toString());
     },
   }),
 });
@@ -82,6 +70,5 @@ const imageDelete = async (req, res, next) => {
 
 module.exports = {
   uploadS3,
-  updateS3,
   imageDelete,
 };

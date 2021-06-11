@@ -120,6 +120,7 @@ const postProject = async (req, res, next) => {
       project_id: project.project_id,
       user_id: userId,
       role_id: roleId,
+      org_id: orgId,
     });
 
     if (beneficiaries.length > 0) {
