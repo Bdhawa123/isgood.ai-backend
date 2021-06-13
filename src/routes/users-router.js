@@ -53,6 +53,58 @@ usersRouter.post("/update", jsonBodyParser, jwtCheck, (req, res, next) => {
     });
 });
 
+usersRouter.post("/lastorg", jsonBodyParser, jwtCheck, (req, res, next) => {
+  const { orgId } = req.body;
+
+  const data = {
+    user_metadata: { lastOrg: orgId },
+  };
+
+  // Get a token for sending requests to the Auth0 Management Api
+  AuthService.getManagementApiJwt()
+    .then((tokenRes) => {
+      const token = tokenRes.data.access_token;
+
+      axios
+        .patch(
+          `https://isgood-webapp.us.auth0.com/api/v2/users/${req.user.sub}`,
+          data,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        )
+        .then((managementApiRes) => {
+          res.status(201).json(managementApiRes.data);
+        })
+        .catch((err) => {
+          // error handling here needs to be looked at in the future
+          res.status(err.response.data.statusCode).json(err.response.data);
+        });
+    })
+    .catch((err) => {
+      // error handling here needs to be looked at in the future
+      res.status(err.response.status).json(err.response.data);
+    });
+});
+
+usersRouter.get("/", jwtCheck, (req, res, next) => {
+  AuthService.getManagementApiJwt().then((tokenRes) => {
+    const token = tokenRes.data.access_token;
+    axios
+      .get(`https://isgood-webapp.us.auth0.com/api/v2/users/${req.user.sub}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((userMetaData) => {
+        res.json(userMetaData.data);
+      })
+      .catch((error) => console.log(error));
+  });
+});
+
 usersRouter.post(
   "/image",
   jwtCheck,
@@ -93,21 +145,5 @@ usersRouter.post(
       });
   }
 );
-
-usersRouter.get("/", jwtCheck, (req, res, next) => {
-  AuthService.getManagementApiJwt().then((tokenRes) => {
-    const token = tokenRes.data.access_token;
-    axios
-      .get(`https://isgood-webapp.us.auth0.com/api/v2/users/${req.user.sub}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((userMetaData) => {
-        res.json(userMetaData.data);
-      })
-      .catch((error) => console.log(error));
-  });
-});
 
 module.exports = usersRouter;
