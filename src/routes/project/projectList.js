@@ -30,12 +30,14 @@ const listProjects = async (req, res, next) => {
       }
     }
     let projects;
+    console.log(orgUserIds);
     if (orgUserIds.length > 0) {
       projects = await ProjectService.getProjectsByOrgId(
         req.app.get("db"),
         orgUserIds
       );
     }
+    console.log(projects);
 
     for (let i = 0; i < projects.length; i++) {
       for (let j = 0; j < orgUser.length; j++) {
@@ -57,6 +59,7 @@ const listProjects = async (req, res, next) => {
     }
 
     const projectUser = await Promise.all(ProjectUserProjectids);
+    console.log(projectUser);
 
     const projectIds = projectUser.map((item) => item.project_id);
 

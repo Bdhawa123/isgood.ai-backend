@@ -25,8 +25,6 @@ function listOrgs(req, res, next) {
         }
         AWS_S3_Service.getOrgLogos(req.app.get("db"), orgIds).then(
           (orgLogos) => {
-            console.log(orgLogos);
-            console.log(orgs);
             for (let i = 0; i < orgs.length; i++) {
               if (orgLogos.length === 0) {
                 orgs[i].org_logo = {};
@@ -43,7 +41,6 @@ function listOrgs(req, res, next) {
                 }
               }
             }
-            console.log(orgLogos);
             AWS_S3_Service.getOrgBanners(req.app.get("db"), orgIds).then(
               (orgBanner) => {
                 for (let i = 0; i < orgs.length; i++) {

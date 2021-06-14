@@ -7,6 +7,7 @@ const {
   checkProjectCreate,
   checkProjectRead,
   checkProjectUpdate,
+  checkProjectDelete,
 } = require("../../middleware/checkRole");
 const { listProjects } = require("./projectList");
 const {
@@ -25,6 +26,7 @@ const {
   getProjectBanner,
 } = require("./projectFind");
 const { updateProject } = require("./projectUpdate");
+const { setProjectInactive } = require("./projectDestroy");
 
 projectRouter.get("/", jwtCheck, listProjects);
 projectRouter.post(
@@ -50,6 +52,7 @@ projectRouter
     getIndicatorStatus,
     findProject
   )
-  .patch(checkProjectExists, jsonBodyParser, checkProjectUpdate, updateProject);
+  .patch(checkProjectExists, jsonBodyParser, checkProjectUpdate, updateProject)
+  .delete(checkProjectExists, checkProjectDelete, setProjectInactive);
 
 module.exports = projectRouter;
