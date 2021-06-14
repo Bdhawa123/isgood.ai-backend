@@ -27,6 +27,10 @@ Complete the following steps to get started:
    GATEWAY_AUTH_DOMAIN=""
    GATEWAY_GET_INDICATORS=""
    GATEWAY_INDICATOR_DETAILS=""
+   AWS_ACCESS_KEY_ID=""
+   AWS_SECRET_ACCESS_KEY=""
+   BUCKET_NAME=""
+   BUCKET_REGION=""
 6. Create a database with DATABASENAME and your USERNAME
 7. Run `npm run migrate` to create tables
 8. Run `npm run dev` to start nodemon
@@ -53,6 +57,9 @@ api/org/create - (body must contain name and url and a Authorization header cont
 GET
 api/org - (retrieve all organizations based on userId and a Authorization header containing the Bearer token)
 
+DELETE
+api/org/:orgId
+
 ### Projects
 
 POST
@@ -65,6 +72,9 @@ api/project/:projectId - (returns project info and indicators for the project)
 
 PATCH
 api/project/:projectId - (body must contain {"name": "string", "orgId": "string", "description": "string" } Optional: {"coordinates": [ array ], "startDate": "TIMESTAMP" "endDate": "TIMESTAMP" } )
+
+DELETE
+api/project/:projectId - (Query params required- orgId = string)
 
 ### Impacts
 
@@ -87,5 +97,5 @@ api/outcome/delete/:projectId - (body must contain {"orgId": "string","deleteOut
 POST
 api/indicator/:projectId - (this endpoint fetches indicators to assign to a project. Body requires: { "orgId": "or-qxaoKx" } )
 
-POST 
+POST
 api/indicator/details/:projectId - (this endpoint fetches the details for the indicators passed in the body. Body requires: { "orgId": "or-qxaoKx" })

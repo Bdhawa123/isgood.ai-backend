@@ -90,11 +90,18 @@ function checkProjectExists(req, res, next) {
     .then((metaUserProjectInfo) => {
       if (!metaUserProjectInfo) {
         return res.status(400).json({
-          error: { message: `No Projects` },
+          error: { message: `Project does not exist` },
         });
       }
       req.metaUserProjectInfo = metaUserProjectInfo;
-      next();
+      ProjectService.getById(req.app.get("db"), projectId).then((project) => {
+        if (!project) {
+          return res.status(400).json({
+            error: { message: `Project does not exist` },
+          });
+        }
+        next();
+      });
     })
     .catch(next);
 }
