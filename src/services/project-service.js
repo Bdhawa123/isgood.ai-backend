@@ -69,15 +69,33 @@ const ProjectService = {
   },
   getProjects(db, projectId) {
     return db
-      .select("project_id", "name", "updated_at", "description", "org_id")
+      .select(
+        "project_id",
+        "name",
+        "updated_at",
+        "status",
+        "description",
+        "org_id"
+      )
       .from("project")
-      .whereIn("project_id", projectId);
+      .whereIn("project_id", projectId)
+      .groupBy("project_id")
+      .having("status", "=", "true");
   },
   getProjectsByOrgId(db, orgId) {
     return db
-      .select("project_id", "name", "updated_at", "description", "org_id")
+      .select(
+        "project_id",
+        "name",
+        "updated_at",
+        "status",
+        "description",
+        "org_id"
+      )
       .from("project")
-      .whereIn("org_id", orgId);
+      .whereIn("org_id", orgId)
+      .groupBy("project_id")
+      .having("status", "=", "true");
   },
   checkProjectForUser(knex, userId, projectId) {
     return knex("project_user")
@@ -93,6 +111,7 @@ const ProjectService = {
       .select(
         "project_id",
         "name",
+        "status",
         "updated_at",
         "description",
         "geolocation",
@@ -102,6 +121,7 @@ const ProjectService = {
       )
       .where({
         project_id: id,
+        status: true,
       })
       .first();
   },
@@ -116,6 +136,23 @@ const ProjectService = {
     return db.select("*").from("indicator").where({ project_id: projectId });
   },
   updateProject(knex, projectId, newProjectsFields) {
+    return knex("project")
+      .where("project_id", projectId)
+      .update(newProjectsFields)
+      .returning([
+        "project_id",
+        "name",
+        "description",
+        "geolocation",
+        "start_date",
+        "end_date",
+        "org_id",
+      ])
+      .then((rows) => {
+        return rows[0];
+      });
+  },
+  setProjectStatusToInactive(knex, projectId, newProjectsFields) {
     return knex("project")
       .where("project_id", projectId)
       .update(newProjectsFields)

@@ -68,6 +68,7 @@ CREATE TABLE "org" (
     "handle" TEXT,
     "region" TEXT,
     "sector" TEXT,
+    "status" BOOLEAN NOT NULL DEFAULT true,
     
     PRIMARY KEY ("org_id")
 );
@@ -105,6 +106,7 @@ CREATE TABLE "project" (
     "start_date" TIMESTAMPTZ,
     "end_date" TIMESTAMPTZ,
     "org_id" TEXT,
+    "status" BOOLEAN NOT NULL DEFAULT true,
 
 
     PRIMARY KEY ("project_id"),
@@ -139,7 +141,6 @@ CREATE TABLE "org_user" (
     "user_id" TEXT NOT NULL,
     "role_id" INTEGER NOT NULL,
     "invitation_token" TEXT,
-    "status" BOOLEAN NOT NULL DEFAULT true,
     "created_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     PRIMARY KEY ("id"),
@@ -154,7 +155,6 @@ CREATE TABLE "project_user" (
     "org_id" TEXT NOT NULL,
     "user_id" TEXT NOT NULL,
     "role_id" INTEGER NOT NULL,
-    "status" BOOLEAN NOT NULL DEFAULT true,
     "created_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     PRIMARY KEY ("id"),
