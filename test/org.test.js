@@ -33,14 +33,12 @@ describe('Organisations', () => {
         const response = await request.get('/api/org').set(Auth);
         expect(response.headers["content-type"]).toContain('application/json')
         expect(response.statusCode).toBe(200);
-        expect(response.body).toEqual([]);
     });
 
     it('Creates New Organisations --> POST', async () => {
         const response = await request.post('/api/org/create').set(Auth).send(org[0]);
         expect(response.statusCode).toBe(201);
-        expect(response.body).toHaveProperty("id")
-        expect(response.body.id).toBe(1)
+        expect(response.body).toHaveProperty("org_id")
     });
 
     it("Does not grant GET access to Unauthorised user", async () => {
