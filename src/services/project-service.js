@@ -3,7 +3,7 @@ const ProjectService = {
     return db
       .insert(newProject)
       .into("project")
-      .returning(["project_id", "org_id"])
+      .returning(["project_id", "name", "updated_at", "description", "org_id"])
       .then(([project]) => project);
   },
   createIndicatorCurrent(db, projectId) {
@@ -55,28 +55,21 @@ const ProjectService = {
       .select("*")
       .where("user_id", userId)
       .join("roles", "roles.id", "=", "project_user.role_id")
-      .select("project_user.project_id", "project_user.status", "roles.name");
+      .select("project_user.project_id", "roles.name");
   },
   getProjectIdFromProjectUser(knex, userId, orgId) {
     return knex("project_user")
       .select("*")
       .where({ user_id: userId, org_id: orgId })
       .join("roles", "roles.id", "=", "project_user.role_id")
-      .select("project_user.project_id", "project_user.status", "roles.name")
+      .select("project_user.project_id", "roles.name")
       .then((rows) => {
         return rows[0];
       });
   },
   getProjects(db, projectId) {
     return db
-      .select(
-        "project_id",
-        "name",
-        "updated_at",
-        "status",
-        "description",
-        "org_id"
-      )
+      .select("project_id", "name", "updated_at", "description", "org_id")
       .from("project")
       .whereIn("project_id", projectId)
       .groupBy("project_id")
@@ -84,14 +77,7 @@ const ProjectService = {
   },
   getProjectsByOrgId(db, orgId) {
     return db
-      .select(
-        "project_id",
-        "name",
-        "updated_at",
-        "status",
-        "description",
-        "org_id"
-      )
+      .select("project_id", "name", "updated_at", "description", "org_id")
       .from("project")
       .whereIn("org_id", orgId)
       .groupBy("project_id")
@@ -111,7 +97,6 @@ const ProjectService = {
       .select(
         "project_id",
         "name",
-        "status",
         "updated_at",
         "description",
         "geolocation",

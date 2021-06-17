@@ -65,24 +65,6 @@ const updateProject = async (req, res, next) => {
   }
 };
 
-function checkProjectExists(req, res, next) {
-  const { projectId } = req.params;
-  const userId = req.user.sub;
-
-  ProjectService.checkProjectForUser(req.app.get("db"), userId, projectId)
-    .then((metaUserProjectInfo) => {
-      if (!metaUserProjectInfo) {
-        return res.status(400).json({
-          error: { message: `No Projects` },
-        });
-      }
-      req.metaUserProjectInfo = metaUserProjectInfo;
-      next();
-    })
-    .catch(next);
-}
-
 module.exports = {
-  checkProjectExists,
   updateProject,
 };
