@@ -11,6 +11,7 @@ const listProjects = async (req, res, next) => {
       userId
     );
 
+    // check is not working and you need to return empty array.
     if (!orgUser) {
       return res.status(200).json({
         message: `No Organizations`,
@@ -29,6 +30,7 @@ const listProjects = async (req, res, next) => {
         projectUserOrgIds.push(orgUser[i].org_id);
       }
     }
+
     let projects;
     console.log(orgUserIds);
     if (orgUserIds.length > 0) {
