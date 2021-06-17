@@ -29,7 +29,7 @@ const listProjects = async (req, res, next) => {
         projectUserOrgIds.push(orgUser[i].org_id);
       }
     }
-    let projects;
+    let projects = [];
     console.log(orgUserIds);
     if (orgUserIds.length > 0) {
       projects = await ProjectService.getProjectsByOrgId(
