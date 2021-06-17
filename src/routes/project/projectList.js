@@ -12,10 +12,9 @@ const listProjects = async (req, res, next) => {
     );
 
     // check is not working and you need to return empty array.
-    if (!orgUser) {
-      return res.status(200).json({
-        message: `No Organizations`,
-      });
+
+    if (orgUser.length === 0) {
+      return res.status(200).json([]);
     }
 
     const orgUserIds = [];
@@ -32,14 +31,12 @@ const listProjects = async (req, res, next) => {
     }
 
     let projects;
-    console.log(orgUserIds);
     if (orgUserIds.length > 0) {
       projects = await ProjectService.getProjectsByOrgId(
         req.app.get("db"),
         orgUserIds
       );
     }
-    console.log(projects);
 
     for (let i = 0; i < projects.length; i++) {
       for (let j = 0; j < orgUser.length; j++) {
@@ -89,17 +86,17 @@ const listProjects = async (req, res, next) => {
 
     for (let i = 0; i < mergedProjects.length; i++) {
       if (projectLogos.length === 0) {
-        mergedProjects[i].project_logo = {};
+        mergedProjects[i].logo = {};
       }
       for (let j = 0; j < projectLogos.length; j++) {
         if (mergedProjects[i].project_id === projectLogos[j].project_id) {
-          mergedProjects[i].project_logo = {
+          mergedProjects[i].logo = {
             location: projectLogos[j].location,
             id: projectLogos[j].id,
           };
           i++;
         } else {
-          mergedProjects[i].project_logo = {};
+          mergedProjects[i].logo = {};
         }
       }
     }
@@ -111,17 +108,17 @@ const listProjects = async (req, res, next) => {
 
     for (let i = 0; i < mergedProjects.length; i++) {
       if (projectBanners.length === 0) {
-        mergedProjects[i].project_banner = {};
+        mergedProjects[i].banner = {};
       }
       for (let j = 0; j < projectBanners.length; j++) {
         if (mergedProjects[i].project_id === projectBanners[j].project_id) {
-          mergedProjects[i].project_banner = {
+          mergedProjects[i].banner = {
             location: projectBanners[j].location,
             id: projectBanners[j].id,
           };
           i++;
         } else {
-          mergedProjects[i].project_banner = {};
+          mergedProjects[i].banner = {};
         }
       }
     }
