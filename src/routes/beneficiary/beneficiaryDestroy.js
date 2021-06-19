@@ -1,4 +1,3 @@
-const xss = require("xss");
 const BeneficiaryService = require("../../services/beneficaryService");
 const ProjectService = require("../../services/project-service");
 
