@@ -12,7 +12,6 @@ const listProjects = async (req, res, next) => {
     );
 
     // check is not working and you need to return empty array.
-
     if (orgUser.length === 0) {
       return res.status(200).json([]);
     }
