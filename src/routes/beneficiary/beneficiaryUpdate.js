@@ -64,7 +64,6 @@ const updateBeneficiary = async (req, res, next) => {
     );
 
     updatedBeneficiary.lifeChanges = getLifeChanges;
-
     const updatedDemographics = [];
     const newDemographics = [];
     for (let i = 0; i < demographics.length; i++) {
@@ -104,7 +103,7 @@ const updateBeneficiary = async (req, res, next) => {
 
     await Promise.all(updatedDemographics);
 
-    const getDemographics = BeneficiaryService.getDemographics(
+    const getDemographics = await BeneficiaryService.getDemographics(
       req.app.get("db"),
       beneficiary.beneficiary_id
     );

@@ -1,14 +1,7 @@
-const REGEX_CANT_CONTAIN =
-  /(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&])[\S]+/;
+const REGEX_MUST_CONTAIN = /(?=.*[(><=)])+/;
 
 const REGEX_AGE = /(?=.*[0-120])+/;
 const BeneficiaryService = {
-  validateOperator(operator) {
-    if (!REGEX_CANT_CONTAIN.test(operator)) {
-      return `operator cant contain ${operator}`;
-    }
-    return null;
-  },
   validateNameOperatorValue(name, operator, value) {
     if (!name) {
       return "name is required";
@@ -19,27 +12,28 @@ const BeneficiaryService = {
     if (!value) {
       return "value is required";
     }
-    if (name.toLowerCase() !== "age" || name.toLowerCase() !== "gender") {
-      return "name must be age or gender";
-    }
-    if (name.toLowerCase() === "age") {
-      if (!REGEX_AGE.test(value)) {
-        return `${value} is out of range`;
+    if (name.toLowerCase() === "age" || name.toLowerCase() === "gender") {
+      if (name.toLowerCase() === "age") {
+        if (!REGEX_AGE.test(value)) {
+          return `${value} is out of range`;
+        }
+        if (!REGEX_MUST_CONTAIN.test(operator)) {
+          return `operator must contain <, >, <=, >=, or =`;
+        }
+        return null;
       }
-      if (!REGEX_CANT_CONTAIN.test(operator)) {
-        return `operator cant contain ${operator}`;
-      }
-      return null;
-    }
-    if (name.toLowerCase() === "gender") {
-      if (
-        value.toLowerCase() !== "male" ||
-        value.toLowerCase() !== "female" ||
-        value.toLowerCase() !== "other"
-      ) {
+      if (name.toLowerCase() === "gender") {
+        if (
+          value.toLowerCase() === "male" ||
+          value.toLowerCase() === "female" ||
+          value.toLowerCase() === "other"
+        ) {
+          return null;
+        }
         return "value must contain either male, female, or other";
       }
-      return null;
+    } else {
+      return "name must be age or gender";
     }
   },
   getBeneficiaries(db, id) {
@@ -48,11 +42,10 @@ const BeneficiaryService = {
       .from("beneficiary")
       .where("project_id", id);
   },
-  updateBeneficiaries(knex, projectId, beneficiaryId, newBeneficiary) {
+  updateBeneficiaries(knex, beneficiaryId, newBeneficiary) {
     return knex("beneficiary")
       .where({
-        id: beneficiaryId,
-        project_id: projectId,
+        beneficiary_id: beneficiaryId,
       })
       .update(newBeneficiary)
       .returning(["beneficiary_id", "name"])
@@ -62,7 +55,7 @@ const BeneficiaryService = {
     return knex("beneficiary").insert(newBeneficiaries, ["*"]);
   },
   deleteBeneficiary(knex, id) {
-    return knex("beneficiary").where({ id }).delete();
+    return knex("beneficiary").where({ beneficiary_id: id }).delete();
   },
   getLifeChanges(db, beneficiaryId) {
     return db
