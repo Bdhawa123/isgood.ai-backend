@@ -56,7 +56,7 @@ const deleteBeneficiary = async (req, res, next) => {
     for (let i = 0; i < beneficiaries.length; i++) {
       newBeneficiary[i].lifeChange = [];
       for (let j = 0; j < lifeChanges.length; j++) {
-        if (beneficiaries[i].beneficiary_id == lifeChanges[j].beneficiary_id) {
+        if (beneficiaries[i].beneficiary_id === lifeChanges[j].beneficiary_id) {
           newBeneficiary[i].lifeChange.push({
             life_change_id: lifeChanges[j].life_change_id,
             description: lifeChanges[j].description,

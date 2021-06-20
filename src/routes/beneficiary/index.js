@@ -6,12 +6,28 @@ const jwtCheck = require("../../middleware/oAuth");
 const { checkProjectUpdate } = require("../../middleware/checkRole");
 const { updateBeneficiary } = require("./beneficiaryUpdate");
 const { deleteBeneficiary } = require("./beneficiaryDestroy");
+const { checkProjectExists } = require("../project/projectFind");
+const { orgExists } = require("../project/projectCreate");
 
 beneficiaryRouter
   .route("/update/:projectId")
-  .patch(jsonBodyParser, updateBeneficiary);
+  .patch(
+    jwtCheck,
+    checkProjectExists,
+    jsonBodyParser,
+    orgExists,
+    checkProjectUpdate,
+    updateBeneficiary
+  );
 beneficiaryRouter
   .route("/delete/:projectId")
-  .delete(jsonBodyParser, deleteBeneficiary);
+  .delete(
+    jwtCheck,
+    checkProjectExists,
+    jsonBodyParser,
+    orgExists,
+    checkProjectUpdate,
+    deleteBeneficiary
+  );
 
 module.exports = beneficiaryRouter;
