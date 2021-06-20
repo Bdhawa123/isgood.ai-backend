@@ -30,4 +30,5 @@ beneficiaryRouter
     deleteBeneficiary
   );
 
+
 module.exports = beneficiaryRouter;
