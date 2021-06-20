@@ -93,6 +93,8 @@ const postProject = async (req, res, next) => {
       newProject
     );
 
+    project.role = req.role.name;
+
     // once project is created.. create impact entry with projectId as FK
     const newImpacts = [];
     for (let i = 0; i < projectImpacts.length; i++) {
@@ -115,6 +117,7 @@ const postProject = async (req, res, next) => {
     await ImpactService.createImpact(req.app.get("db"), newImpacts);
     // once impacts are created.. insert projectOutcomes in outcome table
     await OutcomeService.createOutcome(req.app.get("db"), newOutcomes);
+
     // once outcomes are created.. create userProject table
     await ProjectService.createProjectUser(req.app.get("db"), {
       project_id: project.project_id,
@@ -198,9 +201,12 @@ const postProject = async (req, res, next) => {
         newProjectId
       );
 
-      project.project_logo = projectLogo.location;
+      project.logo = {
+        location: projectLogo.location,
+        id: projectLogo.id,
+      };
     } else {
-      project.project_logo = "";
+      project.logo = {};
     }
 
     if (req.bannerExist) {
@@ -210,9 +216,12 @@ const postProject = async (req, res, next) => {
         newProjectId
       );
 
-      project.project_banner = projectBanner.location;
+      project.banner = {
+        location: projectBanner.location,
+        id: projectBanner.id,
+      };
     } else {
-      project.project_banner = "";
+      project.banner = {};
     }
     res.status(201).json(project);
   } catch (err) {
@@ -224,20 +233,22 @@ function getRoleId(req, res, next) {
   const roleName = req.body.role;
   if (roleName) {
     RoleService.getByName(req.app.get("db"), roleName)
-      .then((roleId) => {
-        if (!roleId) {
+      .then((role) => {
+        if (!role) {
           return res.status(400).json({
             error: { message: `Role '${roleName}' does not exist` },
           });
         }
-        req.roleId = roleId.id;
+        req.role = role;
+        req.roleId = role.id;
         next();
       })
       .catch(next);
   } else {
     RoleService.getByName(req.app.get("db"), "PROJECT_OWNER")
-      .then((roleRes) => {
-        req.roleId = roleRes.id;
+      .then((role) => {
+        req.roleId = role.id;
+        req.role = role;
         next();
       })
       .catch(next);

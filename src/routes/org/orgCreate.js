@@ -31,6 +31,8 @@ const postOrg = async (req, res, next) => {
   try {
     // Create Organization
     const org = await OrgService.createOrg(req.app.get("db"), newOrg);
+
+    org.role = req.role.name;
     // Now create an orgUser entry
     await OrgService.createOrgUser(req.app.get("db"), {
       user_id: userId,
@@ -77,20 +79,22 @@ function getRoleId(req, res, next) {
 
   if (roleName) {
     RoleService.getByName(req.app.get("db"), roleName)
-      .then((roleId) => {
-        if (!roleId) {
+      .then((role) => {
+        if (!role) {
           return res.status(400).json({
             error: { message: `Role '${roleName}' does not exist` },
           });
         }
-        req.roleId = roleId.id;
+        req.role = role;
+        req.roleId = role.id;
         next();
       })
       .catch(next);
   } else {
     RoleService.getByName(req.app.get("db"), "ORGANIZATION_OWNER")
-      .then((roleRes) => {
-        req.roleId = roleRes.id;
+      .then((role) => {
+        req.role = role;
+        req.roleId = role.id;
         next();
       })
       .catch(next);

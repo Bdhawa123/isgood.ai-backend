@@ -5,7 +5,17 @@ const OrgService = {
     return db
       .insert(newOrg)
       .into("org")
-      .returning("*")
+      .returning([
+        "org_id",
+        "updated_at",
+        "name",
+        "url",
+        "plan",
+        "description",
+        "handle",
+        "region",
+        "sector",
+      ])
       .then(([org]) => org);
   },
   createOrgUser(db, orgUserInfo) {
@@ -33,7 +43,17 @@ const OrgService = {
   },
   getOrgs(db, orgId) {
     return db
-      .select("*")
+      .select(
+        "org_id",
+        "updated_at",
+        "name",
+        "url",
+        "plan",
+        "description",
+        "handle",
+        "region",
+        "sector"
+      )
       .from("org")
       .whereIn("org_id", orgId)
       .groupBy("org_id")

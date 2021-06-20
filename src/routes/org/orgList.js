@@ -27,17 +27,17 @@ function listOrgs(req, res, next) {
           (orgLogos) => {
             for (let i = 0; i < orgs.length; i++) {
               if (orgLogos.length === 0) {
-                orgs[i].org_logo = {};
+                orgs[i].logo = {};
               }
               for (let j = 0; j < orgLogos.length; j++) {
                 if (orgs[i].org_id === orgLogos[j].org_id) {
-                  orgs[i].org_logo = {
+                  orgs[i].logo = {
                     location: orgLogos[j].location,
                     id: orgLogos[j].id,
                   };
                   i++;
                 } else {
-                  orgs[i].org_logo = {};
+                  orgs[i].logo = {};
                 }
               }
             }
@@ -45,17 +45,17 @@ function listOrgs(req, res, next) {
               (orgBanner) => {
                 for (let i = 0; i < orgs.length; i++) {
                   if (orgBanner.length === 0) {
-                    orgs[i].org_banner = {};
+                    orgs[i].banner = {};
                   }
                   for (let j = 0; j < orgBanner.length; j++) {
                     if (orgs[i].org_id === orgBanner[j].org_id) {
-                      orgs[i].org_banner = {
+                      orgs[i].banner = {
                         location: orgBanner[j].location,
                         id: orgBanner[j].id,
                       };
                       i++;
                     } else {
-                      orgs[i].org_banner = {};
+                      orgs[i].banner = {};
                     }
                   }
                 }

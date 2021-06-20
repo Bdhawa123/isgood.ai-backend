@@ -4,28 +4,26 @@ const ImpactService = require("../../services/impact-service");
 const AWS_S3_Service = require("../../services/aws-s3-service");
 
 function findProject(req, res, next) {
-  const { metaUserProjectInfo } = req;
+  const { projectId } = req.params;
 
-  ImpactService.getImpacts(req.app.get("db"), metaUserProjectInfo.project_id)
+  ImpactService.getImpacts(req.app.get("db"), projectId)
     .then((impacts) => {
-      OutcomeService.getOutcomes(
-        req.app.get("db"),
-        metaUserProjectInfo.project_id
-      ).then((outcomes) => {
-        ProjectService.getById(
-          req.app.get("db"),
-          metaUserProjectInfo.project_id
-        ).then((project) => {
-          project.role = req.role.name;
-          project.impacts = impacts;
-          project.outcomes = outcomes;
-          project.beneficiaries = req.beneficiaries;
-          project.logo = req.logo;
-          project.banner = req.banner;
-          project.indicator_status = req.status;
-          res.status(200).json(project);
-        });
-      });
+      OutcomeService.getOutcomes(req.app.get("db"), projectId).then(
+        (outcomes) => {
+          ProjectService.getById(req.app.get("db"), projectId).then(
+            (project) => {
+              project.role = req.role.name;
+              project.impacts = impacts;
+              project.outcomes = outcomes;
+              project.beneficiaries = req.beneficiaries;
+              project.logo = req.logo;
+              project.banner = req.banner;
+              project.indicator_status = req.status;
+              res.status(200).json(project);
+            }
+          );
+        }
+      );
     })
     .catch(next);
 }
@@ -84,24 +82,15 @@ function getBeneficiaries(req, res, next) {
 
 function checkProjectExists(req, res, next) {
   const { projectId } = req.params;
-  const userId = req.user.sub;
 
-  ProjectService.checkProjectForUser(req.app.get("db"), userId, projectId)
-    .then((metaUserProjectInfo) => {
-      if (!metaUserProjectInfo) {
+  ProjectService.getById(req.app.get("db"), projectId)
+    .then((project) => {
+      if (!project) {
         return res.status(400).json({
           error: { message: `Project does not exist` },
         });
       }
-      req.metaUserProjectInfo = metaUserProjectInfo;
-      ProjectService.getById(req.app.get("db"), projectId).then((project) => {
-        if (!project) {
-          return res.status(400).json({
-            error: { message: `Project does not exist` },
-          });
-        }
-        next();
-      });
+      next();
     })
     .catch(next);
 }

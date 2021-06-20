@@ -7,7 +7,6 @@ const config = require("../../config");
 const handleIndicators = (req, res, next) => {
   const { project } = req;
 
-  // Will be a post request but the endpoint is not functioning yet. Using jsonServer for now to create dummy data
   axios
     .post(config.GATEWAY_GET_INDICATORS, project)
     .then((indicatorRes) => {
