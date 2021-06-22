@@ -32,20 +32,16 @@ function getBeneficiaries(req, res, next) {
   const { projectId } = req.params;
   ProjectService.getBeneficiaries(req.app.get("db"), projectId)
     .then((beneficiaries) => {
-      const beneficiaryIds = beneficiaries.map(
-        (beneficiary) => beneficiary.beneficiary_id
-      );
+      const beneficiaryIds = beneficiaries.map((beneficiary) => beneficiary.id);
       ProjectService.getLifeChange(req.app.get("db"), beneficiaryIds).then(
         (lifeChanges) => {
           const newBeneficiary = beneficiaries;
           for (let i = 0; i < beneficiaries.length; i++) {
             newBeneficiary[i].lifeChange = [];
             for (let j = 0; j < lifeChanges.length; j++) {
-              if (
-                beneficiaries[i].beneficiary_id == lifeChanges[j].beneficiary_id
-              ) {
+              if (beneficiaries[i].id == lifeChanges[j].beneficiary_id) {
                 newBeneficiary[i].lifeChange.push({
-                  life_change_id: lifeChanges[j].life_change_id,
+                  id: lifeChanges[j].id,
                   description: lifeChanges[j].description,
                 });
               }
@@ -58,12 +54,9 @@ function getBeneficiaries(req, res, next) {
             for (let i = 0; i < beneficiaries.length; i++) {
               newBeneficiary[i].demographics = [];
               for (let j = 0; j < demographics.length; j++) {
-                if (
-                  beneficiaries[i].beneficiary_id ==
-                  demographics[j].beneficiary_id
-                ) {
+                if (beneficiaries[i].id == demographics[j].beneficiary_id) {
                   newBeneficiary[i].demographics.push({
-                    demographic_id: demographics[j].demographic_id,
+                    id: demographics[j].id,
                     name: demographics[j].name,
                     operator: demographics[j].operator,
                     value: demographics[j].value,

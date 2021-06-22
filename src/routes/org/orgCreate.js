@@ -36,12 +36,12 @@ const postOrg = async (req, res, next) => {
     // Now create an orgUser entry
     await OrgService.createOrgUser(req.app.get("db"), {
       user_id: userId,
-      org_id: org.org_id,
+      org_id: org.id,
       role_id: roleId,
     });
 
     const newOrgId = {
-      org_id: org.org_id,
+      org_id: org.id,
     };
 
     if (req.logoExist) {

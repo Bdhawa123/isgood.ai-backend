@@ -19,7 +19,7 @@ const updateBeneficiary = async (req, res, next) => {
 
     const updatedBeneficiary = await BeneficiaryService.updateBeneficiaries(
       req.app.get("db"),
-      beneficiary.beneficiary_id,
+      beneficiary.id,
       updatedBeneficiaryName
     );
 
@@ -33,16 +33,16 @@ const updateBeneficiary = async (req, res, next) => {
       }
       const newLifeChange = {
         description: xss(lifeChanges[i].description),
-        beneficiary_id: beneficiary.beneficiary_id,
+        beneficiary_id: beneficiary.id,
       };
 
-      if (!lifeChanges[i].life_change_id) {
+      if (!lifeChanges[i].id) {
         newLifeChanges.push(newLifeChange);
       } else {
         updatedLifeChanges.push(
           BeneficiaryService.updateLifeChange(
             req.app.get("db"),
-            lifeChanges[i].life_change_id,
+            lifeChanges[i].id,
             newLifeChange
           )
         );
@@ -60,7 +60,7 @@ const updateBeneficiary = async (req, res, next) => {
 
     const getLifeChanges = await BeneficiaryService.getLifeChanges(
       req.app.get("db"),
-      beneficiary.beneficiary_id
+      beneficiary.id
     );
 
     updatedBeneficiary.lifeChanges = getLifeChanges;
@@ -76,18 +76,18 @@ const updateBeneficiary = async (req, res, next) => {
         return res.status(400).json({ error: demographicError });
 
       const newDemographic = {
-        beneficiary_id: beneficiary.beneficiary_id,
+        beneficiary_id: beneficiary.id,
         name: xss(demographics[i].name),
         operator: xss(demographics[i].operator),
         value: xss(demographics[i].value),
       };
-      if (!demographics[i].demographic_id) {
+      if (!demographics[i].id) {
         newDemographics.push(newDemographic);
       } else {
         updatedDemographics.push(
           BeneficiaryService.updateDemographic(
             req.app.get("db"),
-            demographics[i].demographic_id,
+            demographics[i].id,
             newDemographic
           )
         );
@@ -105,7 +105,7 @@ const updateBeneficiary = async (req, res, next) => {
 
     const getDemographics = await BeneficiaryService.getDemographics(
       req.app.get("db"),
-      beneficiary.beneficiary_id
+      beneficiary.id
     );
 
     updatedBeneficiary.demographics = getDemographics;

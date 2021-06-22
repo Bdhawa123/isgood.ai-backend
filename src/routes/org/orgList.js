@@ -18,7 +18,7 @@ function listOrgs(req, res, next) {
       .then((orgs) => {
         for (let i = 0; i < orgs.length; i++) {
           for (let j = 0; j < orgUser.length; j++) {
-            if (orgs[i].org_id === orgUser[j].org_id) {
+            if (orgs[i].id === orgUser[j].org_id) {
               orgs[i].role = orgUser[j].name;
             }
           }
@@ -30,7 +30,7 @@ function listOrgs(req, res, next) {
                 orgs[i].logo = {};
               }
               for (let j = 0; j < orgLogos.length; j++) {
-                if (orgs[i].org_id === orgLogos[j].org_id) {
+                if (orgs[i].id === orgLogos[j].org_id) {
                   orgs[i].logo = {
                     location: orgLogos[j].location,
                     id: orgLogos[j].id,
@@ -48,7 +48,7 @@ function listOrgs(req, res, next) {
                     orgs[i].banner = {};
                   }
                   for (let j = 0; j < orgBanner.length; j++) {
-                    if (orgs[i].org_id === orgBanner[j].org_id) {
+                    if (orgs[i].id === orgBanner[j].org_id) {
                       orgs[i].banner = {
                         location: orgBanner[j].location,
                         id: orgBanner[j].id,
