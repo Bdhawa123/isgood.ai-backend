@@ -35,7 +35,7 @@ describe("Organisations", () => {
       .set(Auth)
       .send(org[0]);
     expect(response.statusCode).toBe(201);
-    expect(response.body).toHaveProperty("org_id");
+    expect(response.body).toHaveProperty("id");
   });
 
   it("Does not grant GET access to Unauthorised user", async () => {

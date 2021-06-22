@@ -42,68 +42,68 @@ const BeneficiaryService = {
       .from("beneficiary")
       .where("project_id", id);
   },
-  updateBeneficiaries(knex, beneficiaryId, newBeneficiary) {
+  updateBeneficiaries(knex, id, newBeneficiary) {
     return knex("beneficiary")
       .where({
-        beneficiary_id: beneficiaryId,
+        id,
       })
       .update(newBeneficiary)
-      .returning(["beneficiary_id", "name"])
+      .returning(["id", "name"])
       .then((rows) => rows[0]);
   },
   createBeneficiary(knex, newBeneficiaries) {
     return knex("beneficiary").insert(newBeneficiaries, ["*"]);
   },
   deleteBeneficiary(knex, id) {
-    return knex("beneficiary").where({ beneficiary_id: id }).delete();
+    return knex("beneficiary").where({ id }).delete();
   },
   getLifeChanges(db, beneficiaryId) {
     return db
-      .select("life_change_id", "description")
+      .select("id", "description")
       .from("life_change")
       .where("beneficiary_id", beneficiaryId);
   },
-  updateLifeChange(knex, lifeChangeId, newLifeChange) {
+  updateLifeChange(knex, id, newLifeChange) {
     return knex("life_change")
       .where({
-        life_change_id: lifeChangeId,
+        id,
       })
       .update(newLifeChange)
-      .returning(["life_change_id", "description"])
+      .returning(["id", "description"])
       .then((rows) => rows[0]);
   },
   createLifeChange(knex, newLifeChange) {
     return knex("life_change").insert(newLifeChange, ["*"]);
   },
-  deleteLifeChange(knex, lifeChangeId) {
+  deleteLifeChange(knex, id) {
     return knex("life_change")
       .where({
-        life_change_id: lifeChangeId,
+        id,
       })
       .delete();
   },
   getDemographics(db, beneficiaryId) {
     return db
-      .select("demographic_id", "name", "operator", "value")
+      .select("id", "name", "operator", "value")
       .from("demographic")
       .where("beneficiary_id", beneficiaryId);
   },
-  updateDemographic(knex, demographicId, newDemographic) {
+  updateDemographic(knex, id, newDemographic) {
     return knex("demographic")
       .where({
-        demographic_id: demographicId,
+        id,
       })
       .update(newDemographic)
-      .returning(["demographic_id", "name", "operator", "value"])
+      .returning(["id", "name", "operator", "value"])
       .then((rows) => rows[0]);
   },
   createDemographic(knex, newDemographic) {
     return knex("demographic").insert(newDemographic, ["*"]);
   },
-  deleteDemographic(knex, demographicId) {
+  deleteDemographic(knex, id) {
     return knex("demographic")
       .where({
-        demographic_id: demographicId,
+        id,
       })
       .delete();
   },

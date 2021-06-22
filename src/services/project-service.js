@@ -3,7 +3,7 @@ const ProjectService = {
     return db
       .insert(newProject)
       .into("project")
-      .returning(["project_id", "name", "updated_at", "description", "org_id"])
+      .returning(["id", "name", "updated_at", "description", "org_id"])
       .then(([project]) => project);
   },
   createIndicatorCurrent(db, projectId) {
@@ -27,19 +27,19 @@ const ProjectService = {
   },
   getBeneficiaries(db, projectId) {
     return db
-      .select("beneficiary_id", "name")
+      .select("id", "name")
       .from("beneficiary")
       .where("project_id", projectId);
   },
   getDemographics(db, beneficiaryId) {
     return db
-      .select("demographic_id", "beneficiary_id", "name", "operator", "value")
+      .select("id", "beneficiary_id", "name", "operator", "value")
       .from("demographic")
       .whereIn("beneficiary_id", beneficiaryId);
   },
   getLifeChange(db, beneficiaryId) {
     return db
-      .select("life_change_id", "beneficiary_id", "description")
+      .select("id", "beneficiary_id", "description")
       .from("life_change")
       .whereIn("beneficiary_id", beneficiaryId);
   },
@@ -69,18 +69,18 @@ const ProjectService = {
   },
   getProjects(db, projectId) {
     return db
-      .select("project_id", "name", "updated_at", "description", "org_id")
+      .select("id", "name", "updated_at", "description", "org_id")
       .from("project")
-      .whereIn("project_id", projectId)
-      .groupBy("project_id")
+      .whereIn("id", projectId)
+      .groupBy("id")
       .having("status", "=", "true");
   },
   getProjectsByOrgId(db, orgId) {
     return db
-      .select("project_id", "name", "updated_at", "description", "org_id")
+      .select("id", "name", "updated_at", "description", "org_id")
       .from("project")
       .whereIn("org_id", orgId)
-      .groupBy("project_id")
+      .groupBy("id")
       .having("status", "=", "true");
   },
   checkProjectForUser(knex, userId, projectId) {
@@ -95,7 +95,7 @@ const ProjectService = {
   getById(knex, id) {
     return knex("project")
       .select(
-        "project_id",
+        "id",
         "name",
         "updated_at",
         "description",
@@ -105,7 +105,7 @@ const ProjectService = {
         "org_id"
       )
       .where({
-        project_id: id,
+        id,
         status: true,
       })
       .first();
@@ -122,10 +122,10 @@ const ProjectService = {
   },
   updateProject(knex, projectId, newProjectsFields) {
     return knex("project")
-      .where("project_id", projectId)
+      .where("id", projectId)
       .update(newProjectsFields)
       .returning([
-        "project_id",
+        "id",
         "name",
         "description",
         "geolocation",
@@ -139,10 +139,10 @@ const ProjectService = {
   },
   setProjectStatusToInactive(knex, projectId, newProjectsFields) {
     return knex("project")
-      .where("project_id", projectId)
+      .where("id", projectId)
       .update(newProjectsFields)
       .returning([
-        "project_id",
+        "id",
         "name",
         "description",
         "geolocation",

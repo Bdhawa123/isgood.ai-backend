@@ -12,7 +12,7 @@ const IndicatorService = {
     return knex("project")
       .select("name", "description")
       .where({
-        project_id: id,
+        id,
       })
       .first();
   },
