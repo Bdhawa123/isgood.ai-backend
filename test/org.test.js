@@ -34,6 +34,7 @@ describe('Organisations', () => {
         const response = await supertest(app).get('/api/org').set(Auth);
         expect(response.headers["content-type"]).toContain('application/json')
         expect(response.statusCode).toBe(200);
+        expect(Array.isArray(response.body)).toBeTruthy();
     });
 
     it('Creates New Organisations --> POST', async () => {
@@ -50,6 +51,17 @@ describe('Organisations', () => {
     it("Does not grant POST access to Unauthorised user", async () => {
         const response = await supertest(app).post('/api/org/create').send(org[0]);
         expect(response.statusCode).toBe(401)
+    });
+    it("Deletes an Organisation by changing the status", async () => {
+        const create_org = await supertest(app).post("/api/org/create").set(Auth).send(org[3]);
+        const org_id = create_org.body.org_id;
+        const org_data = await db.select("*").from("org").where("org_id", org_id).first();
+        expect(org_data.status).toBeTruthy();
+        const delete_org = await supertest(app).delete(`/api/org/${org_id}`).set(Auth);
+        expect(delete_org.statusCode).toBe(204);
+        const org_data2 = await db.select("*").from("org").where("org_id", org_id).first();
+        expect(org_data2.status).not.toBeTruthy();
+
     });
 });
 
