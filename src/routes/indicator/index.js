@@ -5,9 +5,14 @@ const jsonBodyParser = express.json();
 const jwtCheck = require("../../middleware/oAuth");
 const { indicatorAuth } = require("../../middleware/indicatorAuth");
 const { checkProjectUpdate } = require("../../middleware/checkRole");
-const { getProject, handleIndicators } = require("./indicatorCreate");
+const {
+  getProject,
+  handleIndicators,
+  saveIndicators,
+} = require("./indicatorCreate");
 const { handleIndicatorsDesc } = require("./indicatorGetDetails");
 
+indicatorRouter.route("/").post(jwtCheck, jsonBodyParser, saveIndicators);
 indicatorRouter
   .route("/:projectId")
   .post(
