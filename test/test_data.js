@@ -25,7 +25,7 @@ const org = [
     url: "https://www.microsoft.com",
     description:
       "A powerful Operating System that powers 50% of world's computers",
-    handle: "twitter/facebook",
+    handle: "twitter/microsoft",
     sector: "Social Media",
     region: "North America",
     logoId: "",
@@ -36,7 +36,7 @@ const org = [
     url: "https://www.apple.com",
     description:
       "A hardware/software company creating an ecosystem of technologies",
-    handle: "twitter/facebook",
+    handle: "twitter/apple",
     sector: "Social Media",
     region: "North America",
     logoId: "",
@@ -176,7 +176,18 @@ const project = {
   bannerId: "",
 };
 
+const updateOrgData = {
+    name: "Apple",
+    url: "https://www.apple.com",
+    description:
+      "A hardware/software company creating an ecosystem of technologies",
+    handle: "twitter/apple",
+    sector: "Social Media",
+    region: "North America",
+}
+
 module.exports = {
   org,
   project,
+  updateOrgData,
 };

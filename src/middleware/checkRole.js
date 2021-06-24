@@ -112,10 +112,25 @@ function checkOrgDelete(req, res, next) {
     .catch(next);
 }
 
+const checkOrgUpdate = async (req, res, next) => {
+  const userId = req.user.sub;
+  const { orgId } = req.params;
+
+  getOrgRole(req.app.get("db"), orgId, userId).then((roles) => {
+    if(roles.name !== "ORGANIZATION_OWNER") {
+      return res.status(403).json({
+        error: { message: "Unauthorized Request" },
+      });
+    }
+    next();
+  }).catch(next)
+};
+
 module.exports = {
   checkProjectCreate,
   checkProjectRead,
   checkProjectUpdate,
   checkProjectDelete,
   checkOrgDelete,
+  checkOrgUpdate,
 };
