@@ -7,7 +7,7 @@ const { org, project } = require("./test_data");
 beforeAll( async () => {
     app.set('db', db);
     const res = await supertest(app).post('/api/org/create').set(Auth).send(org[1]);
-    project.orgId = res.body.org_id;
+    project.orgId = res.body.id;
 });
 
 // Destroy the Database and clear all data

@@ -40,7 +40,7 @@ describe('Organisations', () => {
     it('Creates New Organisations --> POST', async () => {
         const response = await supertest(app).post('/api/org/create').set(Auth).send(org[0]);
         expect(response.statusCode).toBe(201);
-        expect(response.body).toHaveProperty("org_id")
+        expect(response.body).toHaveProperty("id")
     });
 
     it("Does not grant GET access to Unauthorised user", async () => {
@@ -54,12 +54,12 @@ describe('Organisations', () => {
     });
     it("Deletes an Organisation by changing the status", async () => {
         const create_org = await supertest(app).post("/api/org/create").set(Auth).send(org[3]);
-        const org_id = create_org.body.org_id;
-        const org_data = await db.select("*").from("org").where("org_id", org_id).first();
+        const org_id = create_org.body.id;
+        const org_data = await db.select("*").from("org").where("id", org_id).first();
         expect(org_data.status).toBeTruthy();
         const delete_org = await supertest(app).delete(`/api/org/${org_id}`).set(Auth);
         expect(delete_org.statusCode).toBe(204);
-        const org_data2 = await db.select("*").from("org").where("org_id", org_id).first();
+        const org_data2 = await db.select("*").from("org").where("id", org_id).first();
         expect(org_data2.status).not.toBeTruthy();
 
     });
