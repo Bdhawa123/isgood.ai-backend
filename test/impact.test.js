@@ -1,24 +1,31 @@
-const supertest = require("supertest");
-const { db, Auth, app } = require("./setup");
-const { cleanTable } = require("./test_helper_functions");
+const supertest = require('supertest');
+const { db, Auth, app } = require('./setup')
+const { cleanTable } = require('./test_helper_functions')
+
 
 // Set up the database and insert some data
 beforeAll(() => {
-  app.set("db", db);
-  request = supertest(app);
+    app.set('db', db);
+    request = supertest(app);
 });
 
 // Destroy the Database and clear all data
 afterAll(() => {
-  db.destroy();
+    db.destroy()
 });
 
-// Set up Each Test with some data
-beforeEach(() => {});
+// Set up Each Test with somed data
+beforeEach(() => {
+ 
+});
 
 // Clear all the data used for each tests
-afterEach(() => {});
+afterEach(() => {
 
-describe("Organisations", () => {
-  it("List all", () => {});
+});
+
+describe('Organisations', () => {
+    it("List all", () => {
+
+    });
 });

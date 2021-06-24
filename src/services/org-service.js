@@ -82,6 +82,20 @@ const OrgService = {
   setProjectStatusToInactive(knex, orgId, newProjectsFields) {
     return knex("project").where("org_id", orgId).update(newProjectsFields);
   },
+
+  partialUpdateOrg(knex, orgId, data) {
+    return knex("org").where("id", orgId).update(data).returning([
+      "id",
+      "updated_at",
+      "name",
+      "url",
+      "plan",
+      "description",
+      "handle",
+      "region",
+      "sector",
+    ]).then(([org]) => org);
+  }
 };
 
 module.exports = OrgService;
