@@ -1,7 +1,7 @@
-const supertest = require('supertest');
-const { db, Auth, app } = require('./setup')
-const { cleanTable } = require('./test_helper_functions')
-const { org, project, } = require('./test_data');
+const supertest = require("supertest");
+const { db, Auth, app } = require("./setup");
+const { cleanTable } = require("./test_helper_functions");
+const { org, project } = require("./test_data");
 
 // Set up the database and insert some data
 beforeAll( async () => {
@@ -12,34 +12,39 @@ beforeAll( async () => {
 
 // Destroy the Database and clear all data
 afterAll(() => {
-    db.destroy()
+  db.destroy();
 });
 
 // Set up Each Test with somed data
-beforeEach(() => {
-    
-});
+beforeEach(() => {});
 
 // Clear all the data used for each tests
-afterEach(() => {
-});
+afterEach(() => {});
 
-describe('Projects', () => {
-    it("Lists all Projects --> GET ", async () => {
-        const response = await supertest(app).get('/api/project').set(Auth);
-        expect(response.statusCode).toBe(200)
-    });
-    it("Creates New Projects --> POST", async () => {
-        const response = await supertest(app).post('/api/project/create').set(Auth).send(project)
-        expect(response.statusCode).toBe(201);
-        expect(response.body).toHaveProperty("project_id");
-    });
-    it("Gets Project by ID", async () => {
-        const response = await supertest(app).post('/api/project/create').set(Auth).send(project);
-        const project_id = response.body.project_id;
-        const getProjectById = await supertest(app).get(`/api/project/${project_id}`).set(Auth);
-        expect(getProjectById.statusCode).toBe(200)
-        expect(getProjectById.body).toHaveProperty("project_id");
-        expect(getProjectById.body.project_id).toBe(project_id)
-    });
+describe("Projects", () => {
+  it("Lists all Projects --> GET ", async () => {
+    const response = await supertest(app).get("/api/project").set(Auth);
+    expect(response.statusCode).toBe(200);
+  });
+  it("Creates New Projects --> POST", async () => {
+    const response = await supertest(app)
+      .post("/api/project/create")
+      .set(Auth)
+      .send(project);
+    expect(response.statusCode).toBe(201);
+    expect(response.body).toHaveProperty("id");
+  });
+  it("Gets Project by ID", async () => {
+    const response = await supertest(app)
+      .post("/api/project/create")
+      .set(Auth)
+      .send(project);
+    const projectId = response.body.id;
+    const getProjectById = await supertest(app)
+      .get(`/api/project/${projectId}`)
+      .set(Auth);
+    expect(getProjectById.statusCode).toBe(200);
+    expect(getProjectById.body).toHaveProperty("id");
+    expect(getProjectById.body.id).toBe(projectId);
+  });
 });

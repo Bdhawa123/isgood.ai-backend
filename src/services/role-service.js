@@ -33,15 +33,7 @@ const RoleService = {
   },
   getRoles(db, orgId) {
     return db
-      .select(
-        "org_id",
-        "name",
-        "url",
-        "description",
-        "handle",
-        "region",
-        "sector"
-      )
+      .select("id", "name", "url", "description", "handle", "region", "sector")
       .from("org")
       .whereIn("id", orgId);
   },

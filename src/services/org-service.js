@@ -6,7 +6,7 @@ const OrgService = {
       .insert(newOrg)
       .into("org")
       .returning([
-        "org_id",
+        "id",
         "updated_at",
         "name",
         "url",
@@ -44,7 +44,7 @@ const OrgService = {
   getOrgs(db, orgId) {
     return db
       .select(
-        "org_id",
+        "id",
         "updated_at",
         "name",
         "url",
@@ -55,20 +55,20 @@ const OrgService = {
         "sector"
       )
       .from("org")
-      .whereIn("org_id", orgId)
-      .groupBy("org_id")
+      .whereIn("id", orgId)
+      .groupBy("id")
       .having("status", "=", "true");
   },
   getByOrgId(knex, orgId) {
     return knex("org")
       .select("*")
       .where({
-        org_id: orgId,
+        id: orgId,
       })
       .first();
   },
   setOrgStatusInactive(knex, orgId, newStatus) {
-    return knex("org").where("org_id", orgId).update(newStatus);
+    return knex("org").where("id", orgId).update(newStatus);
   },
   serializeOrg(org) {
     return {

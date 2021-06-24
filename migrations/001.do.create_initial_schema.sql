@@ -57,7 +57,7 @@ VALUES
 
 -- CreateTable
 CREATE TABLE "org" (
-    "org_id" TEXT NOT NULL DEFAULT concat('or-', generate_uid(6)) UNIQUE,
+    "id" TEXT NOT NULL DEFAULT concat('or-', generate_uid(6)) UNIQUE,
     "created_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     "name" TEXT NOT NULL,
@@ -70,7 +70,7 @@ CREATE TABLE "org" (
     "sector" TEXT,
     "status" BOOLEAN NOT NULL DEFAULT true,
     
-    PRIMARY KEY ("org_id")
+    PRIMARY KEY ("id")
 );
 
 
@@ -81,7 +81,7 @@ CREATE TABLE "org_logo" (
     "org_id" TEXT,
 
     PRIMARY KEY ("id"),
-    FOREIGN KEY ("org_id") REFERENCES "org"("org_id") ON DELETE CASCADE
+    FOREIGN KEY ("org_id") REFERENCES "org"("id") ON DELETE CASCADE
 );
 
 -- CreateTable
@@ -91,13 +91,13 @@ CREATE TABLE "org_banner" (
     "org_id" TEXT,
 
     PRIMARY KEY ("id"),
-    FOREIGN KEY ("org_id") REFERENCES "org"("org_id") ON DELETE CASCADE
+    FOREIGN KEY ("org_id") REFERENCES "org"("id") ON DELETE CASCADE
 );
 
 
 -- CreateTable
 CREATE TABLE "project" (
-    "project_id" TEXT NOT NULL DEFAULT concat('pr-', generate_uid(6)) UNIQUE,
+    "id" TEXT NOT NULL DEFAULT concat('pr-', generate_uid(6)) UNIQUE,
     "created_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     "name" TEXT NOT NULL,
@@ -109,8 +109,8 @@ CREATE TABLE "project" (
     "status" BOOLEAN NOT NULL DEFAULT true,
 
 
-    PRIMARY KEY ("project_id"),
-    FOREIGN KEY ("org_id") REFERENCES "org"("org_id") ON DELETE CASCADE
+    PRIMARY KEY ("id"),
+    FOREIGN KEY ("org_id") REFERENCES "org"("id") ON DELETE CASCADE
 );
 
 
@@ -121,7 +121,7 @@ CREATE TABLE "project_logo" (
     "project_id" TEXT,
     
     PRIMARY KEY ("id"),
-    FOREIGN KEY ("project_id") REFERENCES "project"("project_id") ON DELETE CASCADE
+    FOREIGN KEY ("project_id") REFERENCES "project"("id") ON DELETE CASCADE
 );
 
 -- CreateTable
@@ -131,7 +131,7 @@ CREATE TABLE "project_banner" (
     "project_id" TEXT,
     
     PRIMARY KEY ("id"),
-    FOREIGN KEY ("project_id") REFERENCES "project"("project_id") ON DELETE CASCADE
+    FOREIGN KEY ("project_id") REFERENCES "project"("id") ON DELETE CASCADE
 );
 
 -- CreateTable
@@ -144,7 +144,7 @@ CREATE TABLE "org_user" (
     "created_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     PRIMARY KEY ("id"),
-    FOREIGN KEY ("org_id") REFERENCES "org"("org_id") ON DELETE CASCADE,
+    FOREIGN KEY ("org_id") REFERENCES "org"("id") ON DELETE CASCADE,
     FOREIGN KEY ("role_id") REFERENCES "roles"("id")
 );
 
@@ -158,43 +158,43 @@ CREATE TABLE "project_user" (
     "created_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     PRIMARY KEY ("id"),
-    FOREIGN KEY ("project_id") REFERENCES "project"("project_id") ON DELETE CASCADE,
+    FOREIGN KEY ("project_id") REFERENCES "project"("id") ON DELETE CASCADE,
     FOREIGN KEY ("role_id") REFERENCES "roles"("id")
 );
 
 -- CreateTable
 CREATE TABLE "beneficiary" (
-    "beneficiary_id" TEXT NOT NULL DEFAULT concat('bn-', generate_uid(6)) UNIQUE,
+    "id" TEXT NOT NULL DEFAULT concat('bn-', generate_uid(6)) UNIQUE,
     "created_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     "name" TEXT NOT NULL,
     "project_id" TEXT,
 
-    PRIMARY KEY ("beneficiary_id"),
-    FOREIGN KEY ("project_id") REFERENCES "project"("project_id") ON DELETE CASCADE
+    PRIMARY KEY ("id"),
+    FOREIGN KEY ("project_id") REFERENCES "project"("id") ON DELETE CASCADE
 );
 
 -- CreateTable
 CREATE TABLE "demographic" (
-    "demographic_id" TEXT NOT NULL DEFAULT concat('dg-', generate_uid(6)) UNIQUE,
+    "id" TEXT NOT NULL DEFAULT concat('dg-', generate_uid(6)) UNIQUE,
     "created_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "name" TEXT NOT NULL,
     "operator" TEXT NOT NULL,
     "value" TEXT NOT NULL,
     "beneficiary_id" TEXT,
 
-    PRIMARY KEY ("demographic_id"),
-    FOREIGN KEY ("beneficiary_id") REFERENCES "beneficiary"("beneficiary_id") ON DELETE CASCADE
+    PRIMARY KEY ("id"),
+    FOREIGN KEY ("beneficiary_id") REFERENCES "beneficiary"("id") ON DELETE CASCADE
 );
 
 -- CreateTable
 CREATE TABLE "life_change" (
-    "life_change_id" TEXT NOT NULL DEFAULT concat('lc-', generate_uid(6)) UNIQUE,
+    "id" TEXT NOT NULL DEFAULT concat('lc-', generate_uid(6)) UNIQUE,
     "beneficiary_id" TEXT NOT NULL,
     "description" TEXT NOT NULL,
 
-    PRIMARY KEY ("life_change_id"),
-    FOREIGN KEY ("beneficiary_id") REFERENCES "beneficiary"("beneficiary_id") ON DELETE CASCADE
+    PRIMARY KEY ("id"),
+    FOREIGN KEY ("beneficiary_id") REFERENCES "beneficiary"("id") ON DELETE CASCADE
 );
 
 CREATE TABLE "impact" (
@@ -203,7 +203,7 @@ CREATE TABLE "impact" (
     "project_id" TEXT,
 
     PRIMARY KEY ("id"),
-    FOREIGN KEY ("project_id") REFERENCES "project"("project_id") ON DELETE CASCADE
+    FOREIGN KEY ("project_id") REFERENCES "project"("id") ON DELETE CASCADE
 );
 
 CREATE TABLE "outcome" (
@@ -212,7 +212,7 @@ CREATE TABLE "outcome" (
     "project_id" TEXT NOT NULL,
 
     PRIMARY KEY ("id"),
-    FOREIGN KEY ("project_id") REFERENCES "project"("project_id") ON DELETE CASCADE
+    FOREIGN KEY ("project_id") REFERENCES "project"("id") ON DELETE CASCADE
 );
 
 CREATE TABLE "indicator" (
@@ -222,7 +222,7 @@ CREATE TABLE "indicator" (
     "aligned_strength" TEXT NOT NULL,
 
     PRIMARY KEY ("id"),
-    FOREIGN KEY ("project_id") REFERENCES "project"("project_id") ON DELETE CASCADE
+    FOREIGN KEY ("project_id") REFERENCES "project"("id") ON DELETE CASCADE
 );
 
 CREATE TABLE "indicator_current" (
@@ -231,7 +231,7 @@ CREATE TABLE "indicator_current" (
     "up_to_date" BOOL NOT NULL DEFAULT false,
 
     PRIMARY KEY ("id"),
-    FOREIGN KEY ("project_id") REFERENCES "project"("project_id") ON DELETE CASCADE
+    FOREIGN KEY ("project_id") REFERENCES "project"("id") ON DELETE CASCADE
 );
 
 -- ----------------------------------- timestamp Triggers ------------------------------------ --
@@ -255,7 +255,7 @@ CREATE OR REPLACE FUNCTION set_timestamp_org()
 RETURNS TRIGGER AS $set_org_timestamp$
 BEGIN
 
-  UPDATE org o SET updated_at = NOW() WHERE o.org_id = OLD.org_id;
+  UPDATE org o SET updated_at = NOW() WHERE o.id = OLD.org_id;
   RETURN NEW;
 END;
 $set_org_timestamp$ LANGUAGE plpgsql;
@@ -274,7 +274,7 @@ CREATE OR REPLACE FUNCTION set_timestamp_project()
 RETURNS TRIGGER AS $set_project_timestamp$
 BEGIN
 
-  UPDATE project p SET updated_at = NOW() WHERE p.project_id = OLD.project_id;
+  UPDATE project p SET updated_at = NOW() WHERE p.id = OLD.project_id;
   RETURN NEW;
 END;
 $set_project_timestamp$ LANGUAGE plpgsql;
@@ -314,7 +314,7 @@ CREATE OR REPLACE FUNCTION set_timestamp_beneficiary()
 RETURNS TRIGGER AS $set_beneficiary_timestamp$
 BEGIN
 
-  UPDATE beneficiary b SET updated_at = NOW() WHERE b.beneficiary_id = OLD.beneficiary_id;
+  UPDATE beneficiary b SET updated_at = NOW() WHERE b.id = OLD.beneficiary_id;
   RETURN NEW;
 END;
 $set_beneficiary_timestamp$ LANGUAGE plpgsql;
@@ -340,7 +340,7 @@ EXECUTE PROCEDURE set_timestamp_beneficiary();
 CREATE OR REPLACE FUNCTION trigger_indicator_false()
 RETURNS TRIGGER AS $indicator_false$
 BEGIN
-  UPDATE indicator_current i SET up_to_date = false WHERE i.project_id = NEW.project_id;
+  UPDATE indicator_current i SET up_to_date = false WHERE i.project_id = NEW.id;
   RETURN NEW;
 END;
 $indicator_false$ LANGUAGE plpgsql;

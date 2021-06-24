@@ -57,7 +57,6 @@ const listProjects = async (req, res, next) => {
     }
 
     const projectUser = await Promise.all(ProjectUserProjectids);
-    console.log(projectUser);
 
     const projectIds = projectUser.map((item) => item.project_id);
 
@@ -68,7 +67,7 @@ const listProjects = async (req, res, next) => {
 
     for (let i = 0; i < newProjects.length; i++) {
       for (let j = 0; j < projectUser.length; j++) {
-        if (newProjects[i].project_id === projectUser[j].project_id) {
+        if (newProjects[i].id === projectUser[j].project_id) {
           newProjects[i].role = projectUser[j].name;
         }
       }
@@ -76,7 +75,7 @@ const listProjects = async (req, res, next) => {
 
     const mergedProjects = projects.concat(newProjects);
 
-    const mergedProjectIds = mergedProjects.map((item) => item.project_id);
+    const mergedProjectIds = mergedProjects.map((item) => item.id);
 
     const projectLogos = await AWS_S3_Service.getProjectLogos(
       req.app.get("db"),
@@ -88,7 +87,7 @@ const listProjects = async (req, res, next) => {
         mergedProjects[i].logo = {};
       }
       for (let j = 0; j < projectLogos.length; j++) {
-        if (mergedProjects[i].project_id === projectLogos[j].project_id) {
+        if (mergedProjects[i].id === projectLogos[j].project_id) {
           mergedProjects[i].logo = {
             location: projectLogos[j].location,
             id: projectLogos[j].id,
@@ -110,7 +109,7 @@ const listProjects = async (req, res, next) => {
         mergedProjects[i].banner = {};
       }
       for (let j = 0; j < projectBanners.length; j++) {
-        if (mergedProjects[i].project_id === projectBanners[j].project_id) {
+        if (mergedProjects[i].id === projectBanners[j].project_id) {
           mergedProjects[i].banner = {
             location: projectBanners[j].location,
             id: projectBanners[j].id,

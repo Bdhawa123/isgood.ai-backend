@@ -14,9 +14,9 @@ const postProject = async (req, res, next) => {
   const {
     name,
     description,
+    beneficiaries,
     projectImpacts,
     outcomesDesired,
-    beneficiaries,
     orgId,
     startDate,
     endDate,
@@ -24,6 +24,9 @@ const postProject = async (req, res, next) => {
     logoId,
     bannerId,
   } = req.body;
+
+  // const projectImpacts = req.body.projectImpacts.description;
+  // const outcomesDesired = req.body.outcomesDesired.description;
 
   // make sure the fields are not empty
   for (const field of [
@@ -99,8 +102,8 @@ const postProject = async (req, res, next) => {
     const newImpacts = [];
     for (let i = 0; i < projectImpacts.length; i++) {
       newImpacts.push({
-        project_id: project.project_id,
-        description: xss(projectImpacts[i]),
+        project_id: project.id,
+        description: xss(projectImpacts[i].description),
       });
     }
 
@@ -108,8 +111,8 @@ const postProject = async (req, res, next) => {
     const newOutcomes = [];
     for (let j = 0; j < outcomesDesired.length; j++) {
       newOutcomes.push({
-        project_id: project.project_id,
-        description: xss(outcomesDesired[j]),
+        project_id: project.id,
+        description: xss(outcomesDesired[j].description),
       });
     }
 
@@ -120,7 +123,7 @@ const postProject = async (req, res, next) => {
 
     // once outcomes are created.. create userProject table
     await ProjectService.createProjectUser(req.app.get("db"), {
-      project_id: project.project_id,
+      project_id: project.id,
       user_id: userId,
       role_id: roleId,
       org_id: orgId,
@@ -130,7 +133,7 @@ const postProject = async (req, res, next) => {
       const newBeneficiaries = [];
       for (let i = 0; i < beneficiaries.length; i++) {
         newBeneficiaries.push({
-          project_id: project.project_id,
+          project_id: project.id,
           name: xss(beneficiaries[i].name),
         });
       }
@@ -152,8 +155,8 @@ const postProject = async (req, res, next) => {
         }
         for (let j = 0; j < beneficiaries[i].lifeChange.length; j++) {
           lifeChanges.push({
-            beneficiary_id: beneficiaryRes[i].beneficiary_id,
-            description: xss(beneficiaries[i].lifeChange[j]),
+            beneficiary_id: beneficiaryRes[i].id,
+            description: xss(beneficiaries[i].lifeChange[j].description),
           });
         }
       }
@@ -174,7 +177,7 @@ const postProject = async (req, res, next) => {
               });
             }
             newDemographics.push({
-              beneficiary_id: beneficiaryRes[i].beneficiary_id,
+              beneficiary_id: beneficiaryRes[i].id,
               name: xss(beneficiaries[i].demographics[j].name),
               operator: xss(beneficiaries[i].demographics[j].operator),
               value: xss(beneficiaries[i].demographics[j].value),
@@ -189,10 +192,10 @@ const postProject = async (req, res, next) => {
     }
     // create entry in indicator_current table
     await ProjectService.createIndicatorCurrent(req.app.get("db"), {
-      project_id: project.project_id,
+      project_id: project.id,
     });
 
-    const newProjectId = { project_id: project.project_id };
+    const newProjectId = { project_id: project.id };
     //   save project logo and banner to db if they exist
     if (req.logoExist) {
       const projectLogo = await AWS_S3_Service.updateProjectLogo(
