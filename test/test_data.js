@@ -177,14 +177,14 @@ const project = {
 };
 
 const updateOrgData = {
-    name: "Apple",
-    url: "https://www.apple.com",
-    description:
-      "A hardware/software company creating an ecosystem of technologies",
-    handle: "twitter/apple",
-    sector: "Social Media",
-    region: "North America",
-}
+  name: "Apple",
+  url: "https://www.apple.com",
+  description:
+    "A hardware/software company creating an ecosystem of technologies",
+  handle: "twitter/apple",
+  sector: "Social Media",
+  region: "North America",
+};
 
 module.exports = {
   org,

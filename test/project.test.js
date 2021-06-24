@@ -4,10 +4,13 @@ const { cleanTable } = require("./test_helper_functions");
 const { org, project } = require("./test_data");
 
 // Set up the database and insert some data
-beforeAll( async () => {
-    app.set('db', db);
-    const res = await supertest(app).post('/api/org/create').set(Auth).send(org[1]);
-    project.orgId = res.body.id;
+beforeAll(async () => {
+  app.set("db", db);
+  const res = await supertest(app)
+    .post("/api/org/create")
+    .set(Auth)
+    .send(org[1]);
+  project.orgId = res.body.id;
 });
 
 // Destroy the Database and clear all data

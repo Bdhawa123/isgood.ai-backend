@@ -10,30 +10,40 @@ const handleIndicators = (req, res, next) => {
   axios
     .post(config.GATEWAY_GET_INDICATORS, project)
     .then((indicatorRes) => {
-      const { indicators } = indicatorRes.data;
-      const concatIndicators = [];
-      for (let i = 0; i < indicators.length; i++) {
-        concatIndicators.push({
-          project_id: indicatorRes.data.projectId,
-          indicator_id: indicators[i].indicatorId,
-          aligned_strength: indicators[i].alignedStrength,
-        });
-      }
-      IndicatorsService.createIndicators(
-        req.app.get("db"),
-        concatIndicators
-      ).then((setIndicators) => {
-        res.status(201).json(setIndicators);
+      res.status(201).json({
+        message: "Project sent. Waiting for indicators",
       });
     })
     .catch((error) => {
-      res.status(201).send({
+      res.status(400).send({
         error: {
           message: "There has been an issue fetching projects indicators",
         },
       });
-      next();
     });
+};
+
+const saveIndicators = async (req, res, next) => {
+  const { projectId, indicators } = req.body;
+
+  const concatIndicators = [];
+  for (let i = 0; i < indicators.length; i++) {
+    concatIndicators.push({
+      project_id: projectId,
+      indicator_id: indicators[i].indicatorId,
+      aligned_strength: indicators[i].alignedStrength,
+    });
+  }
+  try {
+    const indicatorRes = await IndicatorsService.createIndicators(
+      req.app.get("db"),
+      concatIndicators
+    );
+
+    res.status(201).json(indicatorRes);
+  } catch (err) {
+    next(err);
+  }
 };
 
 function getProject(req, res, next) {
@@ -64,5 +74,6 @@ function getProject(req, res, next) {
 
 module.exports = {
   handleIndicators,
+  saveIndicators,
   getProject,
 };
