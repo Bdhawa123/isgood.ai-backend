@@ -273,8 +273,14 @@ EXECUTE PROCEDURE set_timestamp_org();
 CREATE OR REPLACE FUNCTION set_timestamp_project()
 RETURNS TRIGGER AS $set_project_timestamp$
 BEGIN
+IF TG_OP = 'UPDATE' THEN
+    UPDATE project p SET updated_at = NOW() WHERE p.id = OLD.project_id;
+ELSIF TG_OP = 'DELETE' THEN
+     UPDATE project p SET updated_at = NOW() WHERE p.id = OLD.project_id;
+ELSE
 
-  UPDATE project p SET updated_at = NOW() WHERE p.id = OLD.project_id;
+  UPDATE project p SET updated_at = NOW() WHERE p.id = NEW.project_id;
+END IF;
   RETURN NEW;
 END;
 $set_project_timestamp$ LANGUAGE plpgsql;
@@ -309,12 +315,21 @@ EXECUTE PROCEDURE set_timestamp_project();
 
 -- ------------------------------ trigger update beneficiary.updated_at ------------------------- --
 
+
+
 -- Trigger updated Function Project
 CREATE OR REPLACE FUNCTION set_timestamp_beneficiary()
 RETURNS TRIGGER AS $set_beneficiary_timestamp$
 BEGIN
+  IF TG_OP = 'UPDATE' THEN
+    UPDATE beneficiary b SET updated_at = NOW() WHERE b.id = OLD.beneficiary_id;
+  ELSIF TG_OP = 'DELETE' THEN
+    UPDATE beneficiary b SET updated_at = NOW() WHERE b.id = OLD.beneficiary_id;
+  ELSE
+    UPDATE beneficiary b SET updated_at = NOW() WHERE b.id = NEW.beneficiary_id;
 
-  UPDATE beneficiary b SET updated_at = NOW() WHERE b.id = OLD.beneficiary_id;
+END IF;
+
   RETURN NEW;
 END;
 $set_beneficiary_timestamp$ LANGUAGE plpgsql;
